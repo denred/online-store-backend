@@ -17,6 +17,9 @@
   "author": "Denis Redkin",
   "license": "MIT",
   "dependencies": {
+    "@types/convict": "^6.1.6",
+    "convict": "^6.2.4",
+    "dotenv": "^16.3.1",
     "fastify": "^4.24.3",
     "pino": "^8.16.2",
     "pino-pretty": "^10.2.3"
