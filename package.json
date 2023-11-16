@@ -1,0 +1,47 @@
+{
+  "name": "backend",
+  "private": "true",
+  "type": "module",
+  "engines": {
+    "node": "20.x.x",
+    "npm": "10.x.x"
+  },
+  "version": "0.0.1",
+  "scripts": {
+    "lint:editor": "editorconfig-checker",
+    "lint:fs": "ls-lint",
+    "build": "tsc -p tsconfig.json",
+    "start:dev": "nodemon --exec \"node --loader ts-paths-esm-loader --no-warnings\" src/index.ts",
+    "start": "npm run build && cd ./build && node index.js"
+  },
+  "author": "Denis Redkin",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.24.3"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.2",
+    "@commitlint/config-conventional": "^18.4.2",
+    "@ls-lint/ls-lint": "^2.2.2",
+    "@types/node": "^20.9.0",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
+    "commitlint": "^18.4.2",
+    "editorconfig-checker": "^5.1.1",
+    "eslint": "^8.53.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "eslint-plugin-sonarjs": "^0.23.0",
+    "eslint-plugin-unicorn": "^49.0.0",
+    "lint-staged": "^15.1.0",
+    "nodemon": "^3.0.1",
+    "prettier": "3.1.0",
+    "simple-git-hooks": "^2.9.0",
+    "ts-paths-esm-loader": "^1.4.3",
+    "typescript": "^5.2.2"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged",
+    "commit-msg": "npx commitlint --edit $1"
+  }
+}
