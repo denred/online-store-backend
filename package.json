@@ -17,7 +17,9 @@
   "author": "Denis Redkin",
   "license": "MIT",
   "dependencies": {
-    "fastify": "^4.24.3"
+    "fastify": "^4.24.3",
+    "pino": "^8.16.2",
+    "pino-pretty": "^10.2.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.4.2",
