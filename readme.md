@@ -8,6 +8,7 @@ This is the repository responsible for Online-store apps backend.
 
 - [NodeJS](https://nodejs.org/en/) (20.x.x);
 - [NPM](https://www.npmjs.com/) (10.x.x);
+- [MongoDB](https://www.mongodb.com/)
 
 ## 🏃‍♂️ Simple Start
 
