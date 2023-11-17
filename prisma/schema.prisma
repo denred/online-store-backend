@@ -18,3 +18,58 @@ model User {
   hash      String
   createdAt DateTime @default(now())
 }
+
+model Product {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  category     Category
+  subcategory  Subcategory
+  title        String
+  colour       Colour
+  description  String
+  composition  String
+  size         Size[]
+  price        Float
+  brand        String?
+  collection   String?
+  manufacturer String?
+  images       String[]
+  reviews      Review[]
+}
+
+model Review {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  text   String
+  rating Float
+
+  productId String  @unique @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+enum Size {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+}
+
+enum Category {
+  CLOTHING
+}
+
+enum Subcategory {
+  JACKETS
+  COATS
+  TRENCH
+  GILETS
+  OVERSHIRTS
+  SWEATERS
+  CARDIGANS
+  QUILTED
+}
+
+enum Colour {
+  BEIGE
+  BLACK
+}
