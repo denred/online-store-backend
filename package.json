@@ -32,13 +32,15 @@
     "joi": "^17.11.0",
     "jose": "^5.1.1",
     "pino": "^8.16.2",
-    "pino-pretty": "^10.2.3"
+    "pino-pretty": "^10.2.3",
+    "swagger-jsdoc": "^6.2.8"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.4.2",
     "@commitlint/config-conventional": "^18.4.2",
     "@ls-lint/ls-lint": "^2.2.2",
     "@types/node": "^20.9.0",
+    "@types/swagger-jsdoc": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "commitlint": "^18.4.2",
