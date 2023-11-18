@@ -1,19 +1,37 @@
+import { type Product } from '@prisma/client';
+
 import { type IService } from '~/libs/interfaces/interfaces.js';
 
+import { type ProductRepository } from './products.repository.js';
+
 class ProductsService implements IService {
-  public findById(id: unknown, metadata?: unknown): Promise<unknown> {
-    throw new Error('Method not implemented.');
+  private productRepository: ProductRepository;
+
+  public constructor(productRepository: ProductRepository) {
+    this.productRepository = productRepository;
   }
 
-  public create(payload: unknown): Promise<unknown> {
-    throw new Error('Method not implemented.');
+  public async findAll(): Promise<Product[]> {
+    return await this.productRepository.findAll();
   }
 
-  public update(id: unknown, payload: unknown): Promise<unknown> {
-    throw new Error('Method not implemented.');
+  public async findById(id: string): Promise<Product | null> {
+    const [product = null] = await this.productRepository.findById(id);
+
+    return product;
   }
 
-  public delete(id: unknown, metadata?: unknown): Promise<boolean> {
-    throw new Error('Method not implemented.');
+  public async create(payload: Product): Promise<Product> {
+    return await this.productRepository.create(payload);
+  }
+
+  public async update(id: string, payload: Product): Promise<Product> {
+    return await this.productRepository.update(id, payload);
+  }
+
+  public async delete(id: string): Promise<boolean> {
+    return await this.productRepository.delete(id);
   }
 }
+
+export { ProductsService };
