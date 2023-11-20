@@ -2,7 +2,7 @@ import { type PrismaClient, type Product } from '@prisma/client';
 
 import { type IRepository } from '~/libs/interfaces/interfaces.js';
 
-class ProductRepository implements IRepository {
+class ProductsRepository implements IRepository {
   private db: Pick<PrismaClient, 'product'>;
 
   public constructor(database: Pick<PrismaClient, 'product'>) {
@@ -33,4 +33,4 @@ class ProductRepository implements IRepository {
   }
 }
 
-export { ProductRepository };
+export { ProductsRepository };

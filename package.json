@@ -10,7 +10,7 @@
   "scripts": {
     "lint:editor": "editorconfig-checker",
     "lint:fs": "ls-lint",
-    "build": "tsc -p tsconfig.json",
+    "build": "npx tsc && tsc-alias -p tsconfig.json",
     "start:dev": "nodemon --exec \"node --loader ts-paths-esm-loader --no-warnings\" src/index.ts",
     "start": "npm run build && cd ./build && node index.js"
   },
@@ -56,6 +56,8 @@
     "prisma": "^5.6.0",
     "simple-git-hooks": "^2.9.0",
     "ts-paths-esm-loader": "^1.4.3",
+    "tsc-alias": "^1.8.8",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2"
   },
   "simple-git-hooks": {

@@ -33,7 +33,6 @@ model Product {
   collection   String?
   manufacturer String?
   images       String[]
-  reviews      Review[]
 }
 
 model Review {
@@ -41,8 +40,7 @@ model Review {
   text   String
   rating Float
 
-  productId String  @unique @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id])
+  productId String @unique @db.ObjectId
 }
 
 enum Size {
