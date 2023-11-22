@@ -10,6 +10,7 @@ import { HttpCode } from '~/libs/packages/http/enums/enums.js';
 import { type ILogger } from '~/libs/packages/logger/interfaces/interfaces.js';
 
 import { ProductsApiPath } from './libs/enums/enums.js';
+import { type CreateProductDto } from './libs/types/create-product-dto.type.js';
 import {
   createProductSchema,
   productParametersSchema,
@@ -50,10 +51,12 @@ import { type ProductsService } from './products.service.js';
  *           type: string
  *         manufacturer:
  *           type: string
- *         images:
+ *         files:
  *           type: array
  *           items:
  *             type: string
+ *             format: binary
+ *             example: "id"
  *
  *     CreateProductBody:
  *       type: object
@@ -69,15 +72,15 @@ import { type ProductsService } from './products.service.js';
  *           $ref: '#/components/schemas/Colour'
  *         description:
  *           type: string
- *           example: 'Bomber design. Faux suede. Front zip closure. Long sleeve with elastic cuffs. Two side pockets with flaps. Hem with an elastic band. Inner zipped pocket. Inner lining. The model is 183 cm and is wearing a size M.'
+ *           example: 'Bomber design. Faux suede. Front zip closure. Long sleeve with elastic cuffs...'
  *         composition:
  *           type: string
- *           example: '60% polyester, 40% recycled polyester. Lining: 100% polyester. Rib: 98% polyester, 2% elastane'
+ *           example: '60% polyester, 40% recycled polyester. Lining: 100% polyester...'
  *         size:
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/Size'
- *           example: [XS,S,M,L,XL]
+ *           example: ['XS', 'S', 'M', 'L', 'XL']
  *         price:
  *           type: number
  *           example: 199.9
@@ -87,11 +90,13 @@ import { type ProductsService } from './products.service.js';
  *         manufacturer:
  *           type: string
  *           example: Bangladesh
- *         images:
+ *         files:
  *           type: array
  *           items:
  *             type: string
- *           example: []
+ *             format: binary
+ *             description: image id
+ *             example: "655ce5fde572c6437cdd3059"
  *
  *     Review:
  *       type: object
@@ -137,6 +142,47 @@ import { type ProductsService } from './products.service.js';
  *       enum:
  *         - BEIGE
  *         - BLACK
+ *
+ *     File:
+ *       type: object
+ *       properties:
+ *         filename:
+ *           type: string
+ *           example: image.jpg
+ *         content:
+ *           type: string
+ *           description: Valid MIME type
+ *           example: image/png
+ *
+ *     ErrorType:
+ *       type: object
+ *       properties:
+ *         errorType:
+ *           type: string
+ *           example: COMMON
+ *           enum:
+ *             - COMMON
+ *             - VALIDATION
+ *
+ *     FileDoesNotExist:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ErrorType'
+ *         - type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               enum:
+ *                 - File with such id does not exist!
+ *
+ *     ValidationError:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ErrorType'
+ *         - type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               enum:
+ *                 - Product isn't valid!
  */
 class ProductsController extends Controller {
   private productsService: ProductsService;
@@ -153,17 +199,27 @@ class ProductsController extends Controller {
         body: createProductSchema,
       },
       handler: (options) =>
-        this.create(
-          options as ApiHandlerOptions<{
-            body: Product;
-          }>,
-        ),
+        this.create(options as ApiHandlerOptions<{ body: CreateProductDto }>),
     });
 
     this.addRoute({
       path: ProductsApiPath.ROOT,
       method: 'GET',
       handler: () => this.findAll(),
+    });
+
+    this.addRoute({
+      path: ProductsApiPath.$ID,
+      method: 'GET',
+      validation: {
+        params: productParametersSchema,
+      },
+      handler: (options) =>
+        this.findById(
+          options as ApiHandlerOptions<{
+            params: { id: string };
+          }>,
+        ),
     });
 
     this.addRoute({
@@ -196,36 +252,49 @@ class ProductsController extends Controller {
   /**
    * @swagger
    * /products/:
-   *    post:
-   *      tags:
+   *   post:
+   *     tags:
    *       - Products API
-   *      summary: Create product
-   *      description: Create product
-   *      requestBody:
-   *        content:
-   *          application/json:
-   *            schema:
-   *              $ref: '#/components/schemas/CreateProductBody'
-   *      responses:
-   *        201:
-   *          description: Successful product creation.
-   *          content:
-   *            application/json:
-   *              schema:
-   *                $ref: '#/components/schemas/Product'
-   *        422:
-   *          description: Unprocessable Entity
+   *     summary: Create product
+   *     description: Add a new product to the store
+   *     operationId: create
+   *     requestBody:
+   *       description: Add a new product to the store
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/CreateProductBody'
+   *     responses:
+   *       201:
+   *         description: Successful product creation.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Product'
+   *       422:
+   *         description: Unprocessable Entity
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ValidationError'
+   *       400:
+   *         description: Bad Request
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/FileDoesNotExist'
    */
   private async create(
     options: ApiHandlerOptions<{
-      body: Product;
+      body: CreateProductDto;
     }>,
   ): Promise<ApiHandlerResponse> {
-    const createdProduct = await this.productsService.create(options.body);
+    const cratedProduct = await this.productsService.create(options.body);
 
     return {
       status: HttpCode.CREATED,
-      payload: createdProduct,
+      payload: cratedProduct,
     };
   }
 
@@ -241,17 +310,59 @@ class ProductsController extends Controller {
    *        200:
    *          description: Find operation had no errors.
    *          content:
-   *            items:
-   *              type: array
-   *              items:
-   *                $ref: '#/components/schemas/Product'
+   *            application/json:
+   *              schema:
+   *                type: array
+   *                items:
+   *                  $ref: '#/components/schemas/Product'
    */
   private async findAll(): Promise<ApiHandlerResponse> {
     const products = await this.productsService.findAll();
 
     return {
       status: HttpCode.OK,
-      payload: { result: products },
+      payload: products,
+    };
+  }
+
+  /**
+   * @swagger
+   * /products/{id}:
+   *   get:
+   *     tags:
+   *       - Products API
+   *     summary: Find product by ID
+   *     description: Retrieve a product by providing its ID
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         description: ID of the product to be retrieved
+   *         schema:
+   *           type: string
+   *     responses:
+   *       '200':
+   *         description: Successful product retrieval.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Product'
+   *       '400':
+   *         description: Bad Request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/FileDoesNotExist'
+   */
+  private async findById(
+    options: ApiHandlerOptions<{ params: { id: string } }>,
+  ): Promise<ApiHandlerResponse> {
+    const { id } = options.params;
+    const product = await this.productsService.findById(id);
+
+    return {
+      status: HttpCode.OK,
+      payload: product,
     };
   }
 
@@ -326,6 +437,7 @@ class ProductsController extends Controller {
     options: ApiHandlerOptions<{ params: { id: string } }>,
   ): Promise<ApiHandlerResponse> {
     const { id } = options.params;
+
     const status = await this.productsService.delete(id);
 
     return {

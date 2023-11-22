@@ -43,7 +43,7 @@ class ServerAppApi implements IServerAppApi {
 
     const options: swaggerJSDoc.OAS3Options = {
       definition: {
-        openapi: '3.0.0',
+        openapi: '3.0.3',
         info: {
           title: 'Online-store API',
           version: `${this.version}.0.0`,

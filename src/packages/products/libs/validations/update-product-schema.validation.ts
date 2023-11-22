@@ -64,7 +64,7 @@ const updateProductSchema = Joi.object({
     'any.only': ErrorMessage.INVALID,
     'string.max': ErrorMessage.MAX_LENGTH,
   }),
-  images: Joi.array().items(Joi.string()),
+  files: Joi.array().items(Joi.string()),
 });
 
 export { updateProductSchema };

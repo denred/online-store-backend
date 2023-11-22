@@ -62,6 +62,7 @@ class Controller implements IController {
       body,
       query,
       params,
+      parsedFiles: undefined,
       hostname: buildUrl(protocol, hostname),
     };
   }

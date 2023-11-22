@@ -17,7 +17,9 @@ class ProductsRepository implements IRepository {
     return await this.db.product.findMany({ where: { id } });
   }
 
-  public async create(payload: Product): Promise<Product> {
+  public async create(
+    payload: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Product> {
     return await this.db.product.create({ data: payload });
   }
 

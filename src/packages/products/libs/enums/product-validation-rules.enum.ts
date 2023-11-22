@@ -4,6 +4,7 @@ const ProductValidationRules = {
   COMPOSITION_MAX_LENGTH: 800,
   PRICE_MIN: 1,
   PRICE_MAX: 10_000,
+  ID_LENGTH: 24,
 } as const;
 
 export { ProductValidationRules };

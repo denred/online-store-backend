@@ -7,6 +7,7 @@ type ApiHandlerOptions<
   query: T['query'];
   params: T['params'];
   hostname: T['hostname'];
+  parsedFiles: T['parsedFiles'];
 };
 
 export { type ApiHandlerOptions };

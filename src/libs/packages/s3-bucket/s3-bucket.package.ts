@@ -6,6 +6,7 @@ import {
   type PutObjectCommandOutput,
   S3Client,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import { type IConfig } from '../config/config.js';
 import { type EnvironmentSchema } from '../config/types/environment-schema.type.js';
@@ -47,6 +48,21 @@ class S3Bucket {
     const contents = await result.Body.transformToByteArray();
 
     return Buffer.from(contents);
+  }
+
+  public async getObjectPresignedUrl(
+    key: string,
+    expiresIn: number = this.signedUrlExpiresIn,
+  ): Promise<string> {
+    const command = new GetObjectCommand({ Bucket: this.bucketName, Key: key });
+
+    const url = await getSignedUrl(this.s3Client, command, {
+      expiresIn,
+    });
+
+    this.logger.info(`Get object (presigned URL): request sent. Key: "${key}"`);
+
+    return url;
   }
 
   public async putObject(

@@ -11,12 +11,13 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  firstName String?
-  lastName  String?
-  email     String
-  hash      String
-  createdAt DateTime @default(now())
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  firstName  String?
+  lastName   String?
+  email      String
+  hash       String
+  createdAt  DateTime @default(now())
+  updateddAt DateTime @default(now()) @updatedAt
 }
 
 model Product {
@@ -32,7 +33,9 @@ model Product {
   brand        String?
   collection   String?
   manufacturer String?
-  images       String[]
+  createdAt    DateTime    @default(now())
+  updateddAt   DateTime    @default(now()) @updatedAt
+  files        String[]
 }
 
 model Review {
@@ -70,4 +73,13 @@ enum Subcategory {
 enum Colour {
   BEIGE
   BLACK
+}
+
+model File {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  key         String   @unique
+  name        String
+  contentType String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 }

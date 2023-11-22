@@ -1,5 +1,6 @@
 import fastifyAuth from '@fastify/auth';
 import cors from '@fastify/cors';
+import fastifyMultipart from '@fastify/multipart';
 import swagger, { type StaticDocumentSpec } from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { type PrismaClient } from '@prisma/client';
@@ -18,9 +19,11 @@ import {
   type ServerCommonErrorResponse,
   type ServerValidationErrorResponse,
 } from '~/libs/types/types.js';
+import { filesValidationPlugin } from '~/packages/files/files-validation.plugin.js';
 
 import { type IConfig } from '../config/config.js';
 import { type EnvironmentSchema } from '../config/types/types.js';
+// import { type ValidateFilesStrategyOptions } from '../controller/types/validate-files-strategy-options.type.js';
 import { HttpCode } from '../http/enums/enums.js';
 import { type ILogger } from '../logger/logger.js';
 import {
@@ -57,11 +60,18 @@ class ServerApp implements IServerApp {
   }
 
   public addRoute(parameters: RouteParameters): void {
-    const { path, method, handler, validation } = parameters;
+    const { path, method, handler, validation, validateFilesStrategy } =
+      parameters;
 
     const onRequests: onRequestHookHandler[] = [];
     const preHandler: preHandlerHookHandler[] = [];
     const preValidations: preValidationHookHandler[] = [];
+
+    if (validateFilesStrategy) {
+      // preValidations.push(
+      //   this.resolveFileValidationStrategy(validateFilesStrategy),
+      // );
+    }
 
     const schema: FastifySchema = {};
 
@@ -89,6 +99,14 @@ class ServerApp implements IServerApp {
 
     this.logger.info(`Route: ${method as string} ${path} is registered`);
   }
+
+  // private resolveFileValidationStrategy(
+  //   validateFilesStrategy: ValidateFilesStrategyOptions,
+  // ): preHandlerHookHandler {
+  //   const { strategy, filesInputConfig } = validateFilesStrategy;
+
+  //   return this.app[strategy](filesInputConfig);
+  // }
 
   public addRoutes(parameters: RouteParameters[]): void {
     for (const it of parameters) {
@@ -152,10 +170,6 @@ class ServerApp implements IServerApp {
           const response: ServerValidationErrorResponse = {
             errorType: ServerErrorType.VALIDATION,
             message: error.message,
-            details: error.details.map((it) => ({
-              path: it.path,
-              message: it.message,
-            })),
           };
 
           return replay.status(HttpCode.UNPROCESSED_ENTITY).send(response);
@@ -188,6 +202,14 @@ class ServerApp implements IServerApp {
 
   private async initPlugins(): Promise<void> {
     await this.app.register(fastifyAuth);
+
+    await this.app.register(fastifyMultipart, {
+      attachFieldsToBody: true,
+      limits: {
+        fileSize: 10 * 1024 * 1024,
+      },
+    });
+    await this.app.register(filesValidationPlugin);
   }
 
   public async init(): Promise<void> {
