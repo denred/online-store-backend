@@ -1,4 +1,6 @@
 type MultipartParsedFile = {
+  file?: Buffer;
+  _buf?: Buffer;
   fieldname: string;
   filename: string;
   encoding: string;

@@ -60,6 +60,9 @@ const createInvalidFileErrorMessage = (
 
       return `File '${problemFile.filename}': invalid name.`;
     }
+    default: {
+      return 'Unexpected error occurred';
+    }
   }
 };
 

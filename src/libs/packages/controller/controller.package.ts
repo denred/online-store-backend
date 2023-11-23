@@ -1,3 +1,5 @@
+import { type MultipartParsedFile } from '~/packages/files/libs/types/multipart-parsed-file.type.js';
+
 import { type ILogger } from '../logger/logger.js';
 import { type RouteParameters } from '../server-app/server-app.js';
 import { buildUrl } from './helpers/helpers.js';
@@ -62,7 +64,7 @@ class Controller implements IController {
       body,
       query,
       params,
-      parsedFiles: undefined,
+      parsedFiles: (body as { files: MultipartParsedFile[] })?.files,
       hostname: buildUrl(protocol, hostname),
     };
   }

@@ -61,7 +61,7 @@ class FilesService implements IService {
     for (const parsedFile of parsedFiles) {
       const key = constructKey(uuidv4(), folder);
       const name = parsedFile.filename;
-      const body = parsedFile.content;
+      const body = parsedFile._buf ?? parsedFile.content;
       let S3OperationSuccess = false;
 
       try {
@@ -95,7 +95,7 @@ class FilesService implements IService {
   ): Promise<File> {
     const key = constructKey(uuidv4(), folder);
     const name = parsedFile.filename;
-    const body = parsedFile.content;
+    const body = parsedFile.content ?? parsedFile._buf;
     let S3OperationSuccess = false;
 
     try {
@@ -132,10 +132,10 @@ class FilesService implements IService {
       });
     }
 
-    const { filename, content, mimetype } = parsedFile;
+    const { filename, content, mimetype, _buf } = parsedFile;
 
     try {
-      await this.s3Bucket.putObject(file.key, content, mimetype);
+      await this.s3Bucket.putObject(file.key, content ?? _buf, mimetype);
 
       return await this.filesRepository.update(id, {
         name: filename,
@@ -162,10 +162,10 @@ class FilesService implements IService {
       });
     }
 
-    const { filename, content, mimetype } = parsedFile;
+    const { filename, content, mimetype, _buf } = parsedFile;
 
     try {
-      await this.s3Bucket.putObject(file.key, content, mimetype);
+      await this.s3Bucket.putObject(file.key, content ?? _buf, mimetype);
 
       return await this.filesRepository.update(file.id, {
         name: filename,

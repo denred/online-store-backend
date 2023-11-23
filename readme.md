@@ -18,6 +18,11 @@ This is the repository responsible for Online-store apps backend.
 4. **`npm run start`** at the root
 5. Enjoy <3
 
+## 📚 API Documentation
+
+1. **`NODE_ENV=development`** in .env file
+2. [**`http://localhost:3001/v1/documentation`**](http://localhost:3001/v1/documentation)
+
 ### 🌑 Backend
 
 - [Fastify](https://www.fastify.io/) — a backend framework.

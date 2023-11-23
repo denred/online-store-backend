@@ -10,6 +10,7 @@ const parseFormDataFields = (
   request: FastifyRequest,
 ): Record<string, unknown> & { files: MultipartFile[] } => {
   const parsedBody = {} as Record<string, unknown> & { files: MultipartFile[] };
+
   for (const [fieldName, field] of Object.entries(
     request.body as MultipartFields,
   )) {

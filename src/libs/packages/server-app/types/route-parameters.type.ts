@@ -18,10 +18,6 @@ type RouteParameters = {
     body?: ValidationSchema;
     params?: ValidationSchema;
     query?: ValidationSchema;
-    productBody?: {
-      product?: ValidationSchema;
-      images?: ValidationSchema;
-    };
   };
 };
 
