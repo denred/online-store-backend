@@ -1,5 +1,6 @@
 import fastifyAuth from '@fastify/auth';
 import cors from '@fastify/cors';
+import fastifyMultipart from '@fastify/multipart';
 import swagger, { type StaticDocumentSpec } from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { type PrismaClient } from '@prisma/client';
@@ -18,9 +19,12 @@ import {
   type ServerCommonErrorResponse,
   type ServerValidationErrorResponse,
 } from '~/libs/types/types.js';
+import { filesValidationPlugin } from '~/packages/files/files-validation.plugin.js';
+import { type FileInputConfig } from '~/packages/files/libs/types/types.js';
 
 import { type IConfig } from '../config/config.js';
 import { type EnvironmentSchema } from '../config/types/types.js';
+import { type ValidateFilesStrategyOptions } from '../controller/types/validate-files-strategy-options.type.js';
 import { HttpCode } from '../http/enums/enums.js';
 import { type ILogger } from '../logger/logger.js';
 import {
@@ -35,6 +39,8 @@ type Constructor = {
   database: PrismaClient;
   apis: IServerAppApi[];
 };
+
+type StrategyFunction = (config?: FileInputConfig) => preHandlerHookHandler;
 
 class ServerApp implements IServerApp {
   private config: IConfig<EnvironmentSchema>;
@@ -57,11 +63,18 @@ class ServerApp implements IServerApp {
   }
 
   public addRoute(parameters: RouteParameters): void {
-    const { path, method, handler, validation } = parameters;
+    const { path, method, handler, validation, validateFilesStrategy } =
+      parameters;
 
     const onRequests: onRequestHookHandler[] = [];
     const preHandler: preHandlerHookHandler[] = [];
     const preValidations: preValidationHookHandler[] = [];
+
+    if (validateFilesStrategy) {
+      preValidations.push(
+        this.resolveFileValidationStrategy(validateFilesStrategy),
+      );
+    }
 
     const schema: FastifySchema = {};
 
@@ -88,6 +101,20 @@ class ServerApp implements IServerApp {
     });
 
     this.logger.info(`Route: ${method as string} ${path} is registered`);
+  }
+
+  private resolveFileValidationStrategy(
+    validateFilesStrategy: ValidateFilesStrategyOptions,
+  ): preHandlerHookHandler {
+    const { strategy, filesInputConfig } = validateFilesStrategy;
+
+    if (!(strategy in this.app)) {
+      throw new Error(`Invalid strategy: ${strategy}`);
+    }
+
+    const strategyFunction = this.app[strategy] as StrategyFunction;
+
+    return strategyFunction(filesInputConfig);
   }
 
   public addRoutes(parameters: RouteParameters[]): void {
@@ -152,10 +179,6 @@ class ServerApp implements IServerApp {
           const response: ServerValidationErrorResponse = {
             errorType: ServerErrorType.VALIDATION,
             message: error.message,
-            details: error.details.map((it) => ({
-              path: it.path,
-              message: it.message,
-            })),
           };
 
           return replay.status(HttpCode.UNPROCESSED_ENTITY).send(response);
@@ -188,6 +211,14 @@ class ServerApp implements IServerApp {
 
   private async initPlugins(): Promise<void> {
     await this.app.register(fastifyAuth);
+    await this.app.register(filesValidationPlugin);
+
+    await this.app.register(fastifyMultipart, {
+      attachFieldsToBody: true,
+      limits: {
+        fileSize: 10 * 1024 * 1024,
+      },
+    });
   }
 
   public async init(): Promise<void> {
