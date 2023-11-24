@@ -12,7 +12,7 @@ import { type S3Bucket } from '~/libs/packages/s3-bucket/s3-bucket.js';
 import { type ValueOf } from '~/libs/types/types.js';
 
 import { type MultipartParsedFile } from '../products/libs/types/types.js';
-import { type FilesRepoitory } from './files.repository.js';
+import { type FilesRepository } from './files.repository.js';
 import { type S3PublicFolder } from './libs/enums/enums.js';
 import { constructKey } from './libs/helpers/helpers.js';
 
@@ -21,12 +21,12 @@ class FilesService implements IService {
 
   private logger: ILogger;
 
-  private filesRepository: FilesRepoitory;
+  private filesRepository: FilesRepository;
 
   public constructor(
     s3Bucket: S3Bucket,
     logger: ILogger,
-    filesRepository: FilesRepoitory,
+    filesRepository: FilesRepository,
   ) {
     this.s3Bucket = s3Bucket;
     this.logger = logger;

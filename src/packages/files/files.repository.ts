@@ -4,7 +4,7 @@ import { type IRepository } from '~/libs/interfaces/interfaces.js';
 
 import { type CreateFileDto } from './libs/types/types.js';
 
-class FilesRepoitory implements IRepository {
+class FilesRepository implements IRepository {
   private db: Pick<PrismaClient, 'file'>;
 
   public constructor(database: Pick<PrismaClient, 'file'>) {
@@ -39,4 +39,4 @@ class FilesRepoitory implements IRepository {
   }
 }
 
-export { FilesRepoitory };
+export { FilesRepository };

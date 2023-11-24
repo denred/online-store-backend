@@ -12,7 +12,7 @@ This is the repository responsible for Online-store apps backend.
 
 ## 🏃‍♂️ Simple Start
 
-1. **`npm run install`** at the root
+1. **`npm install`** at the root
 2. Fill ENVs
 3. **`npx simple-git-hooks`** at the root
 4. **`npm run start`** at the root
