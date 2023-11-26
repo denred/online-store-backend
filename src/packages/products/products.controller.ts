@@ -247,6 +247,16 @@ class ProductsController extends Controller {
       handler: (options) =>
         this.delete(options as ApiHandlerOptions<{ params: { id: string } }>),
     });
+
+    this.addRoute({
+      path: ProductsApiPath.SEARCH,
+      method: 'POST',
+      validation: {
+        body: updateProductSchema,
+      },
+      handler: (options) =>
+        this.search(options as ApiHandlerOptions<{ body: Partial<Product> }>),
+    });
   }
 
   /**
@@ -443,6 +453,56 @@ class ProductsController extends Controller {
     return {
       status: HttpCode.NO_CONTENT,
       payload: { result: status },
+    };
+  }
+
+  /**
+   * @swagger
+   * /products/search:
+   *   post:
+   *     tags:
+   *       - Products API
+   *     summary: Search products by field value
+   *     description: Search products by field value
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/CreateProductBody'
+   *     responses:
+   *       200:
+   *         description: Successful products search.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Product'
+   *       422:
+   *         description: Unprocessable Entity
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ValidationError'
+   *       400:
+   *         description: Bad Request
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/FileDoesNotExist'
+   */
+  private async search(
+    options: ApiHandlerOptions<{
+      body: Partial<Product>;
+    }>,
+  ): Promise<ApiHandlerResponse> {
+    const { body } = options;
+    const searchedProducts = await this.productsService.search(body);
+
+    return {
+      status: HttpCode.OK,
+      payload: searchedProducts,
     };
   }
 }
