@@ -11,7 +11,7 @@
     "generate": "npx prisma generate",
     "lint:editor": "editorconfig-checker",
     "lint:fs": "ls-lint",
-    "build": "npx tsc && tsc-alias -p tsconfig.json",
+    "build": "npm run generate && npx tsc && tsc-alias -p tsconfig.json",
     "start:dev": "nodemon --exec \"node --loader ts-paths-esm-loader --no-warnings\" src/index.ts",
     "start": "npm run generate && npm run build && cd ./build && node index.js"
   },

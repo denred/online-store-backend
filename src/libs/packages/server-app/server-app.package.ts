@@ -6,6 +6,7 @@ import swaggerUi from '@fastify/swagger-ui';
 import { type PrismaClient } from '@prisma/client';
 import Fastify, {
   type FastifyError,
+  type FastifyInstance,
   type FastifySchema,
   type onRequestHookHandler,
   type preHandlerHookHandler,
@@ -252,6 +253,10 @@ class ServerApp implements IServerApp {
         this.config.ENV.APP.ENVIRONMENT as string
       }.`,
     );
+  }
+
+  public getFastify(): FastifyInstance {
+    return this.app;
   }
 }
 
