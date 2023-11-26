@@ -54,6 +54,10 @@ class ProductsService implements IService {
     return await this.productsRepository.delete(id);
   }
 
+  public async search(payload: Partial<Product>): Promise<Product[]> {
+    return await this.productsRepository.find(payload);
+  }
+
   private async validateFiles(files: string[]): Promise<void> {
     for (const id of files) {
       await this.filesService.getUrlById(id);

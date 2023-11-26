@@ -1,4 +1,4 @@
-import { type PrismaClient, type Product } from '@prisma/client';
+import { type Prisma, type PrismaClient, type Product } from '@prisma/client';
 
 import { type IRepository } from '~/libs/interfaces/interfaces.js';
 
@@ -15,6 +15,21 @@ class ProductsRepository implements IRepository {
 
   public async findById(id: string): Promise<Product[]> {
     return await this.db.product.findMany({ where: { id } });
+  }
+
+  public async find(payload: Partial<Product>): Promise<Product[]> {
+    const { category, subcategory, colour, size, files, ...rest } = payload;
+
+    const whereClause: Prisma.ProductWhereInput = {
+      ...(category && { category: { equals: category } }),
+      ...(subcategory && { subcategory: { equals: subcategory } }),
+      ...(colour && { colour: { equals: colour } }),
+      ...(size && { size: { hasSome: size } }),
+      ...(files && { files: { hasSome: files } }),
+      ...rest,
+    };
+
+    return await this.db.product.findMany({ where: whereClause });
   }
 
   public async create(

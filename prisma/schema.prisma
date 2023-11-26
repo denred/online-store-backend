@@ -57,6 +57,7 @@ enum Size {
 
 enum Category {
   CLOTHING
+  SHOES
 }
 
 enum Subcategory {
