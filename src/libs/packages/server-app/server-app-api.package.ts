@@ -39,7 +39,7 @@ class ServerAppApi implements IServerAppApi {
       this.config.ENV.APP.ENVIRONMENT === AppEnvironment.DEVELOPMENT;
 
     const controllerExtension = isProduction || isDevelopment ? 'js' : 'ts';
-    const sourceDirectory = isDevelopment ? '.' : 'src';
+    const sourceDirectory = isDevelopment ? 'build' : 'src';
 
     const options: swaggerJSDoc.OAS3Options = {
       definition: {
