@@ -10,7 +10,8 @@ import { HttpCode } from '~/libs/packages/http/http.js';
 import { type ILogger } from '~/libs/packages/logger/logger.js';
 
 import { type FilesService } from './files.service.js';
-import { FilesApiPath } from './libs/enums/enums.js';
+import { fileInputDefaultsConfig } from './libs/config/file-inputs-default.config.js';
+import { FilesApiPath, FilesValidationStrategy } from './libs/enums/enums.js';
 import {
   type FileUploadResponseDto,
   type MultipartParsedFile,
@@ -78,16 +79,25 @@ import {
  *   - bearerAuth: []
  */
 class FilesController extends Controller {
-  private fileService: FilesService;
+  private filesService: FilesService;
 
   public constructor(logger: ILogger, filesService: FilesService) {
     super(logger, ApiPath.FILES);
 
-    this.fileService = filesService;
+    this.filesService = filesService;
 
     this.addRoute({
       path: FilesApiPath.ROOT,
       method: 'POST',
+      validateFilesStrategy: {
+        strategy: FilesValidationStrategy.BASIC,
+        filesInputConfig: {
+          multiple: true,
+          maxSizeBytes: fileInputDefaultsConfig.maxSizeBytes,
+          maxFiles: fileInputDefaultsConfig.maxFiles,
+          accept: fileInputDefaultsConfig.accept,
+        },
+      },
       handler: (options) =>
         this.create(
           options as ApiHandlerOptions<{
@@ -204,7 +214,7 @@ class FilesController extends Controller {
     const files = Array.isArray(options.parsedFiles)
       ? options.parsedFiles
       : [options.parsedFiles];
-    const uploadedFiles = await this.fileService.createMany(files);
+    const uploadedFiles = await this.filesService.createMany(files);
 
     return {
       status: HttpCode.CREATED,
@@ -268,7 +278,7 @@ class FilesController extends Controller {
       body: Pick<File, 'key'>;
     }>,
   ): Promise<ApiHandlerResponse> {
-    const updatedFileRecord = await this.fileService.softUpdate(
+    const updatedFileRecord = await this.filesService.softUpdate(
       options.params.id,
       options.body,
     );
@@ -324,7 +334,7 @@ class FilesController extends Controller {
       params: Pick<File, 'id'>;
     }>,
   ): Promise<ApiHandlerResponse> {
-    const deletionResult = await this.fileService.delete(options.params.id);
+    const deletionResult = await this.filesService.delete(options.params.id);
 
     return {
       status: HttpCode.OK,
@@ -375,7 +385,7 @@ class FilesController extends Controller {
       params: Pick<File, 'id'>;
     }>,
   ): Promise<ApiHandlerResponse> {
-    const url = await this.fileService.getUrlById(options.params.id);
+    const url = await this.filesService.getUrlById(options.params.id);
 
     return {
       status: HttpCode.OK,
@@ -424,7 +434,7 @@ class FilesController extends Controller {
       params: Pick<File, 'id'>;
     }>,
   ): Promise<ApiHandlerResponse> {
-    const fileRecord = await this.fileService.findById(options.params.id);
+    const fileRecord = await this.filesService.findById(options.params.id);
 
     return {
       status: HttpCode.OK,
