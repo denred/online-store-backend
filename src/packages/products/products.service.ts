@@ -3,6 +3,7 @@ import { type Product } from '@prisma/client';
 import { HttpError } from '~/libs/exceptions/http-error.exception.js';
 import { type IService } from '~/libs/interfaces/interfaces.js';
 import { HttpCode, HttpMessage } from '~/libs/packages/http/http.js';
+import { type PaginatedQuery } from '~/libs/types/types.js';
 
 import { type FilesService } from '../files/files.js';
 import { ProductValidationRules } from './libs/enums/product-validation-rules.enum.js';
@@ -22,8 +23,8 @@ class ProductsService implements IService {
     this.filesService = filesService;
   }
 
-  public async findAll(): Promise<Product[]> {
-    return await this.productsRepository.findAll();
+  public async findAll(query: PaginatedQuery): Promise<Product[]> {
+    return await this.productsRepository.findAll(query);
   }
 
   public async findById(id: string): Promise<Product | null> {
@@ -54,8 +55,11 @@ class ProductsService implements IService {
     return await this.productsRepository.delete(id);
   }
 
-  public async search(payload: Partial<Product>): Promise<Product[]> {
-    return await this.productsRepository.find(payload);
+  public async search(
+    payload: Partial<Product>,
+    query: PaginatedQuery,
+  ): Promise<Product[]> {
+    return await this.productsRepository.search(payload, query);
   }
 
   private async validateFiles(files: string[]): Promise<void> {
