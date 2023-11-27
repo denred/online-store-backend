@@ -1,6 +1,9 @@
 import { type Prisma, type PrismaClient, type Product } from '@prisma/client';
 
 import { type IRepository } from '~/libs/interfaces/interfaces.js';
+import { type PaginatedQuery } from '~/libs/types/types.js';
+
+import { getSkip, getTake } from './libs/helpers/helpers.js';
 
 class ProductsRepository implements IRepository {
   private db: Pick<PrismaClient, 'product'>;
@@ -9,15 +12,25 @@ class ProductsRepository implements IRepository {
     this.db = database;
   }
 
-  public async findAll(): Promise<Product[]> {
-    return await this.db.product.findMany();
+  public async count(): Promise<number> {
+    return await this.db.product.count();
+  }
+
+  public async findAll(query: PaginatedQuery): Promise<Product[]> {
+    return await this.db.product.findMany({
+      skip: getSkip(query),
+      take: getTake(query, await this.count()),
+    });
   }
 
   public async findById(id: string): Promise<Product[]> {
     return await this.db.product.findMany({ where: { id } });
   }
 
-  public async find(payload: Partial<Product>): Promise<Product[]> {
+  public async search(
+    payload: Partial<Product>,
+    query: PaginatedQuery,
+  ): Promise<Product[]> {
     const { category, subcategory, colour, size, files, ...rest } = payload;
 
     const whereClause: Prisma.ProductWhereInput = {
@@ -29,7 +42,11 @@ class ProductsRepository implements IRepository {
       ...rest,
     };
 
-    return await this.db.product.findMany({ where: whereClause });
+    return await this.db.product.findMany({
+      skip: getSkip(query),
+      take: getTake(query, await this.count()),
+      where: whereClause,
+    });
   }
 
   public async create(

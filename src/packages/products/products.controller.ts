@@ -8,6 +8,8 @@ import {
 } from '~/libs/packages/controller/controller.js';
 import { HttpCode } from '~/libs/packages/http/enums/enums.js';
 import { type ILogger } from '~/libs/packages/logger/interfaces/interfaces.js';
+import { type PaginatedQuery } from '~/libs/types/types.js';
+import { commonGetPageQuery } from '~/libs/validations/validations.js';
 
 import { ProductsApiPath } from './libs/enums/enums.js';
 import { type CreateProductDto } from './libs/types/create-product-dto.type.js';
@@ -205,7 +207,11 @@ class ProductsController extends Controller {
     this.addRoute({
       path: ProductsApiPath.ROOT,
       method: 'GET',
-      handler: () => this.findAll(),
+      validation: {
+        query: commonGetPageQuery,
+      },
+      handler: (options) =>
+        this.findAll(options as ApiHandlerOptions<{ query: PaginatedQuery }>),
     });
 
     this.addRoute({
@@ -243,6 +249,7 @@ class ProductsController extends Controller {
       method: 'DELETE',
       validation: {
         params: productParametersSchema,
+        query: commonGetPageQuery,
       },
       handler: (options) =>
         this.delete(options as ApiHandlerOptions<{ params: { id: string } }>),
@@ -253,9 +260,15 @@ class ProductsController extends Controller {
       method: 'POST',
       validation: {
         body: updateProductSchema,
+        query: commonGetPageQuery,
       },
       handler: (options) =>
-        this.search(options as ApiHandlerOptions<{ body: Partial<Product> }>),
+        this.search(
+          options as ApiHandlerOptions<{
+            body: Partial<Product>;
+            query: PaginatedQuery;
+          }>,
+        ),
     });
   }
 
@@ -311,23 +324,38 @@ class ProductsController extends Controller {
   /**
    * @swagger
    * /products/:
-   *    get:
-   *      tags:
+   *   get:
+   *     tags:
    *       - Products API
-   *      summary: Find all products
-   *      description: Find all products
-   *      responses:
-   *        200:
-   *          description: Find operation had no errors.
-   *          content:
-   *            application/json:
-   *              schema:
-   *                type: array
-   *                items:
-   *                  $ref: '#/components/schemas/Product'
+   *     summary: Find all products
+   *     description: Find all products
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           default: 1
+   *         description: Page number
+   *       - in: query
+   *         name: size
+   *         schema:
+   *           type: integer
+   *           default: 10
+   *         description: Number of items per page
+   *     responses:
+   *       200:
+   *         description: Find operation had no errors.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Product'
    */
-  private async findAll(): Promise<ApiHandlerResponse> {
-    const products = await this.productsService.findAll();
+  private async findAll(
+    options: ApiHandlerOptions<{ query: PaginatedQuery }>,
+  ): Promise<ApiHandlerResponse> {
+    const products = await this.productsService.findAll(options.query);
 
     return {
       status: HttpCode.OK,
@@ -464,6 +492,19 @@ class ProductsController extends Controller {
    *       - Products API
    *     summary: Search products by field value
    *     description: Search products by field value
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           default: 1
+   *         description: Page number
+   *       - in: query
+   *         name: size
+   *         schema:
+   *           type: integer
+   *           default: 10
+   *         description: Number of items per page
    *     requestBody:
    *       required: true
    *       content:
@@ -495,10 +536,11 @@ class ProductsController extends Controller {
   private async search(
     options: ApiHandlerOptions<{
       body: Partial<Product>;
+      query: PaginatedQuery;
     }>,
   ): Promise<ApiHandlerResponse> {
-    const { body } = options;
-    const searchedProducts = await this.productsService.search(body);
+    const { body, query } = options;
+    const searchedProducts = await this.productsService.search(body, query);
 
     return {
       status: HttpCode.OK,
