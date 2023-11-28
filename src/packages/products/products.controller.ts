@@ -13,6 +13,7 @@ import { commonGetPageQuery } from '~/libs/validations/validations.js';
 
 import { ProductsApiPath } from './libs/enums/enums.js';
 import { type CreateProductDto } from './libs/types/create-product-dto.type.js';
+import { type ImageUrl } from './libs/types/types.js';
 import {
   createProductSchema,
   productParametersSchema,
@@ -198,6 +199,17 @@ import { type ProductsService } from './products.service.js';
  *           type: string
  *           example: 'https://imgbucketonline.s3.eu-north-1.amazonaws.com//4963b077-b3ac-4ab0-a027-ec9a23bab23d?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6AT3X3LBYHSX3HMJ%2F20231128%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20231128T072832Z&X-Amz-Expires=3600&X-Amz-Signature=fbb0eccc5dbec7c08513ebc8103a5d6b3b24ff1c108ac594bbecca54dcd7eb11&X-Amz-SignedHeaders=host&x-id=GetObject'
  *
+ *
+ *     ImageURL:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         url:
+ *           type: string
+ *
  */
 class ProductsController extends Controller {
   private productsService: ProductsService;
@@ -288,6 +300,24 @@ class ProductsController extends Controller {
       path: ProductsApiPath.TOP,
       method: 'GET',
       handler: () => this.top(),
+    });
+
+    this.addRoute({
+      path: ProductsApiPath.IMAGES,
+      method: 'GET',
+      validation: {
+        params: productParametersSchema,
+      },
+      handler: (options) =>
+        this.getImages(
+          options as ApiHandlerOptions<{ params: { id: string } }>,
+        ),
+    });
+
+    this.addRoute({
+      path: ProductsApiPath.NEW,
+      method: 'GET',
+      handler: () => this.getNewProducts(),
     });
   }
 
@@ -591,6 +621,75 @@ class ProductsController extends Controller {
     return {
       status: HttpCode.OK,
       payload: topCategories,
+    };
+  }
+
+  /**
+   * @swagger
+   * /products/images/{id}:
+   *   get:
+   *     tags:
+   *       - Products API
+   *     summary: Get Image URLs by Product ID
+   *     description: Get Image URLs by Product ID
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         description: ID of the product to be retrieved
+   *         schema:
+   *           type: string
+   *     responses:
+   *       '200':
+   *         description: Successful images retrieval.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ImageURL'
+   *       '400':
+   *         description: Bad Request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/FileDoesNotExist'
+   */
+  private async getImages(
+    options: ApiHandlerOptions<{ params: { id: string } }>,
+  ): Promise<ApiHandlerResponse> {
+    const { id } = options.params;
+
+    const images: ImageUrl[] = await this.productsService.getImages(id);
+
+    return {
+      status: HttpCode.OK,
+      payload: images,
+    };
+  }
+
+  /**
+   * @swagger
+   * /products/new:
+   *   get:
+   *     tags:
+   *       - Products API
+   *     summary: Get new products
+   *     description: Get new products
+   *     responses:
+   *       200:
+   *         description: Find operation had no errors.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Product'
+   */
+  private async getNewProducts(): Promise<ApiHandlerResponse> {
+    const newProducts = await this.productsService.getNewProducts();
+
+    return {
+      status: HttpCode.OK,
+      payload: newProducts,
     };
   }
 }

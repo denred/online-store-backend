@@ -3,6 +3,8 @@ const ProductsApiPath = {
   $ID: '/:id',
   SEARCH: '/search',
   TOP: '/top',
+  IMAGES: '/images/:id',
+  NEW: '/new',
 } as const;
 
 export { ProductsApiPath };
