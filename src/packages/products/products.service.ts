@@ -100,17 +100,17 @@ class ProductsService implements IService {
     return true;
   }
 
-  public async top(): Promise<TopCategory[]> {
-    const topCategories: Subcategory[] = [
+  public async getTopCategories(): Promise<TopCategory[]> {
+    const subCategories: Subcategory[] = [
       'JACKETS',
       'SWEATERS',
       'OVERSHIRTS',
       'QUILTED',
     ];
     const IMAGE_POSITION = 6;
-    const tops: TopCategory[] = [];
+    const topCategories: TopCategory[] = [];
 
-    for (const subcategory of topCategories) {
+    for (const subcategory of subCategories) {
       const [product] = await this.search(
         { subcategory },
         { size: 1, page: 0 },
@@ -123,12 +123,16 @@ class ProductsService implements IService {
           : null;
 
         if (title && imageUrl) {
-          tops.push({ id: buildId(title), name: subcategory, url: imageUrl });
+          topCategories.push({
+            id: buildId(title),
+            name: subcategory,
+            url: imageUrl,
+          });
         }
       }
     }
 
-    return tops;
+    return topCategories;
   }
 
   public async getImages(id: string): Promise<ImageUrl[]> {

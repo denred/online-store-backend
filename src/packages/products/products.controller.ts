@@ -299,7 +299,7 @@ class ProductsController extends Controller {
     this.addRoute({
       path: ProductsApiPath.TOP,
       method: 'GET',
-      handler: () => this.top(),
+      handler: () => this.getTopCategories(),
     });
 
     this.addRoute({
@@ -615,8 +615,8 @@ class ProductsController extends Controller {
    *               items:
    *                 $ref: '#/components/schemas/TopCategory'
    */
-  private async top(): Promise<ApiHandlerResponse> {
-    const topCategories = await this.productsService.top();
+  private async getTopCategories(): Promise<ApiHandlerResponse> {
+    const topCategories = await this.productsService.getTopCategories();
 
     return {
       status: HttpCode.OK,
