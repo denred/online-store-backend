@@ -7,7 +7,9 @@ import { type PaginatedQuery } from '~/libs/types/types.js';
 
 import { type FilesService } from '../files/files.js';
 import { ProductValidationRules } from './libs/enums/product-validation-rules.enum.js';
+import { buildImageName } from './libs/helpers/helpers.js';
 import { type CreateProductDto } from './libs/types/create-product-dto.type.js';
+import { type ImageUrl } from './libs/types/types.js';
 import { type ProductsRepository } from './products.repository.js';
 
 class ProductsService implements IService {
@@ -93,6 +95,35 @@ class ProductsService implements IService {
     }
 
     return true;
+  }
+
+  public async getImages(id: string): Promise<ImageUrl[]> {
+    this.isValidPrismaId(id);
+
+    const product = await this.findById(id);
+
+    if (!product) {
+      throw new HttpError({
+        status: HttpCode.BAD_REQUEST,
+        message: HttpMessage.PRODUCT_DOES_NOT_EXIST,
+      });
+    }
+
+    const { title, files } = product;
+    const images: ImageUrl[] = [];
+
+    for (const id of files) {
+      const url = await this.filesService.getUrlById(id);
+      const file = await this.filesService.findById(id);
+
+      if (file) {
+        const name = buildImageName(title, file.name);
+
+        images.push({ id, name, url });
+      }
+    }
+
+    return images;
   }
 }
 
