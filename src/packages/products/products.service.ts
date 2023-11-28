@@ -125,6 +125,26 @@ class ProductsService implements IService {
 
     return images;
   }
+
+  public async getNewProducts(): Promise<Product[]> {
+    const newProductIds = [
+      '65609126e73218a5606f2272',
+      '656092e6e73218a5606f227a',
+      '656493ae89f5931a88a1b9db',
+    ];
+
+    const products: Product[] = [];
+
+    for (const id of newProductIds) {
+      const product = await this.findById(id);
+
+      if (product) {
+        products.push(product);
+      }
+    }
+
+    return products;
+  }
 }
 
 export { ProductsService };
