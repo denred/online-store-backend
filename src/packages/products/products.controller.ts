@@ -270,6 +270,12 @@ class ProductsController extends Controller {
           }>,
         ),
     });
+
+    this.addRoute({
+      path: ProductsApiPath.NEW,
+      method: 'GET',
+      handler: () => this.getNewProducts(),
+    });
   }
 
   /**
@@ -545,6 +551,33 @@ class ProductsController extends Controller {
     return {
       status: HttpCode.OK,
       payload: searchedProducts,
+    };
+  }
+
+  /**
+   * @swagger
+   * /products/new:
+   *   get:
+   *     tags:
+   *       - Products API
+   *     summary: Get new products
+   *     description: Get new products
+   *     responses:
+   *       200:
+   *         description: Find operation had no errors.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Product'
+   */
+  private async getNewProducts(): Promise<ApiHandlerResponse> {
+    const newProducts = await this.productsService.getNewProducts();
+
+    return {
+      status: HttpCode.OK,
+      payload: newProducts,
     };
   }
 }
