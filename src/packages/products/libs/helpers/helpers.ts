@@ -9,4 +9,7 @@ const getSkip = (query: PaginatedQuery): number =>
 const getTake = (query: PaginatedQuery, count: number): number =>
   isObjectEmpty(query) ? count : query.size;
 
-export { getSkip, getTake };
+const buildId = (payload: string): string =>
+  payload && payload.trim().toLowerCase().replaceAll(/[\s-]/g, '_');
+
+export { buildId, getSkip, getTake };

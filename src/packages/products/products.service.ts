@@ -1,4 +1,4 @@
-import { type Product } from '@prisma/client';
+import { type Product, type Subcategory } from '@prisma/client';
 
 import { HttpError } from '~/libs/exceptions/http-error.exception.js';
 import { type IService } from '~/libs/interfaces/interfaces.js';
@@ -7,7 +7,9 @@ import { type PaginatedQuery } from '~/libs/types/types.js';
 
 import { type FilesService } from '../files/files.js';
 import { ProductValidationRules } from './libs/enums/product-validation-rules.enum.js';
+import { buildId } from './libs/helpers/helpers.js';
 import { type CreateProductDto } from './libs/types/create-product-dto.type.js';
+import { type TopCategory } from './libs/types/types.js';
 import { type ProductsRepository } from './products.repository.js';
 
 class ProductsService implements IService {
@@ -93,6 +95,37 @@ class ProductsService implements IService {
     }
 
     return true;
+  }
+
+  public async top(): Promise<TopCategory[]> {
+    const topCategories: Subcategory[] = [
+      'JACKETS',
+      'SWEATERS',
+      'OVERSHIRTS',
+      'QUILTED',
+    ];
+    const IMAGE_POSITION = 6;
+    const tops: TopCategory[] = [];
+
+    for (const subcategory of topCategories) {
+      const [product] = await this.search(
+        { subcategory },
+        { size: 1, page: 0 },
+      );
+
+      if (product) {
+        const { title, files } = product;
+        const imageUrl = files[IMAGE_POSITION]
+          ? await this.filesService.getUrlById(files[IMAGE_POSITION])
+          : null;
+
+        if (title && imageUrl) {
+          tops.push({ id: buildId(title), name: subcategory, url: imageUrl });
+        }
+      }
+    }
+
+    return tops;
   }
 }
 

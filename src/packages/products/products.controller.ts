@@ -185,6 +185,19 @@ import { type ProductsService } from './products.service.js';
  *               type: string
  *               enum:
  *                 - Product isn't valid!
+ *
+ *     TopCategory:
+ *       type: object;
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: basic_denim_jacket
+ *         name:
+ *           schemas: $ref: '#/components/schemas/Subcategory'
+ *         url:
+ *           type: string
+ *           example: 'https://imgbucketonline.s3.eu-north-1.amazonaws.com//4963b077-b3ac-4ab0-a027-ec9a23bab23d?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6AT3X3LBYHSX3HMJ%2F20231128%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20231128T072832Z&X-Amz-Expires=3600&X-Amz-Signature=fbb0eccc5dbec7c08513ebc8103a5d6b3b24ff1c108ac594bbecca54dcd7eb11&X-Amz-SignedHeaders=host&x-id=GetObject'
+ *
  */
 class ProductsController extends Controller {
   private productsService: ProductsService;
@@ -269,6 +282,12 @@ class ProductsController extends Controller {
             query: PaginatedQuery;
           }>,
         ),
+    });
+
+    this.addRoute({
+      path: ProductsApiPath.TOP,
+      method: 'GET',
+      handler: () => this.top(),
     });
   }
 
@@ -545,6 +564,33 @@ class ProductsController extends Controller {
     return {
       status: HttpCode.OK,
       payload: searchedProducts,
+    };
+  }
+
+  /**
+   * @swagger
+   * /products/top:
+   *   get:
+   *     tags:
+   *       - Products API
+   *     summary: Get top categories
+   *     description: Get top categories
+   *     responses:
+   *       200:
+   *         description: Find operation had no errors.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/TopCategory'
+   */
+  private async top(): Promise<ApiHandlerResponse> {
+    const topCategories = await this.productsService.top();
+
+    return {
+      status: HttpCode.OK,
+      payload: topCategories,
     };
   }
 }
