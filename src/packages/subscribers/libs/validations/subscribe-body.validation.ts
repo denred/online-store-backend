@@ -1,12 +1,12 @@
 import Joi from 'joi';
 
-import { SubscribeValidationMessage } from '../enums/enums.js';
+import { SubscriptionValidationMessage } from '../enums/enums.js';
 
-const subscribeBodyValidation = Joi.object({
+const subscriptionBodyValidation = Joi.object({
   email: Joi.string().email().required().messages({
-    'string.base': SubscribeValidationMessage.STRING_BASE,
-    'string.email': SubscribeValidationMessage.STRING_EMAIL,
-    'any.required': SubscribeValidationMessage.ANY_REQUIRED,
+    'string.base': SubscriptionValidationMessage.STRING_BASE,
+    'string.email': SubscriptionValidationMessage.STRING_EMAIL,
+    'any.required': SubscriptionValidationMessage.ANY_REQUIRED,
   }),
   firstName: Joi.string(),
   lastName: Joi.string(),
@@ -16,4 +16,4 @@ const subscribeBodyValidation = Joi.object({
   }),
 });
 
-export { subscribeBodyValidation };
+export { subscriptionBodyValidation };

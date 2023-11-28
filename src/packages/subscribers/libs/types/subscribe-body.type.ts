@@ -1,4 +1,4 @@
-type SubscribeBody = {
+type SubscriptionBody = {
   email: string;
   firstName?: string;
   lastName?: string;
@@ -8,4 +8,4 @@ type SubscribeBody = {
   };
 };
 
-export { type SubscribeBody };
+export { type SubscriptionBody };

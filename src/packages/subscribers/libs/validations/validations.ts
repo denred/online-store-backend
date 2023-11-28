@@ -1,1 +1,1 @@
-export { subscribeBodyValidation } from './subscribe-body.validation.js';
+export { subscriptionBodyValidation } from './subscribe-body.validation.js';

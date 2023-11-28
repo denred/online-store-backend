@@ -2,6 +2,7 @@ import { type FastifyInstance } from 'fastify';
 
 import { filesController } from '~/packages/files/files.js';
 import { productsController } from '~/packages/products/products.js';
+import { subscribersController } from '~/packages/subscribers/subscribers.js';
 
 import { config } from '../config/config.js';
 import { database } from '../database/database.js';
@@ -18,6 +19,7 @@ async function initServer(): Promise<FastifyInstance> {
       config,
       ...productsController.routes,
       ...filesController.routes,
+      ...subscribersController.routes,
     );
 
     server = new ServerApp({ config, logger, database, apis: [apiV1] });

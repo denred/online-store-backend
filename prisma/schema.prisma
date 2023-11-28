@@ -85,19 +85,19 @@ model File {
   updatedAt   DateTime @default(now()) @updatedAt
 }
 
-model Subscribe {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
-  email         String  @unique
-  firstName     String?
-  lastName      String?
-  preferencesId String? @db.ObjectId
+model Subscription {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  email     String  @unique
+  firstName String?
+  lastName  String?
 
-  preferences Preferences? @relation(fields: [preferencesId], references: [id])
+  preferences Preferences?
 }
 
 model Preferences {
-  id                String      @id @default(auto()) @map("_id") @db.ObjectId
-  receiveNewsletter Boolean     @default(false)
-  productUpdates    Boolean     @default(false)
-  Subscribe         Subscribe[]
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  receiveNewsletter Boolean      @default(false)
+  productUpdates    Boolean      @default(false)
+  subscriptionId    String       @unique @db.ObjectId
+  subscription      Subscription @relation(fields: [subscriptionId], references: [id])
 }
