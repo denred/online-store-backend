@@ -13,6 +13,7 @@ import { commonGetPageQuery } from '~/libs/validations/validations.js';
 
 import { ProductsApiPath } from './libs/enums/enums.js';
 import { type CreateProductDto } from './libs/types/create-product-dto.type.js';
+import { type ImageUrl } from './libs/types/types.js';
 import {
   createProductSchema,
   productParametersSchema,
@@ -185,6 +186,17 @@ import { type ProductsService } from './products.service.js';
  *               type: string
  *               enum:
  *                 - Product isn't valid!
+ *
+ *     ImageURL:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         url:
+ *           type: string
+ *
  */
 class ProductsController extends Controller {
   private productsService: ProductsService;
@@ -268,6 +280,18 @@ class ProductsController extends Controller {
             body: Partial<Product>;
             query: PaginatedQuery;
           }>,
+        ),
+    });
+
+    this.addRoute({
+      path: ProductsApiPath.IMAGES,
+      method: 'GET',
+      validation: {
+        params: productParametersSchema,
+      },
+      handler: (options) =>
+        this.getImages(
+          options as ApiHandlerOptions<{ params: { id: string } }>,
         ),
     });
 
@@ -551,6 +575,48 @@ class ProductsController extends Controller {
     return {
       status: HttpCode.OK,
       payload: searchedProducts,
+    };
+  }
+
+  /**
+   * @swagger
+   * /products/images/{id}:
+   *   get:
+   *     tags:
+   *       - Products API
+   *     summary: Get Image URLs by Product ID
+   *     description: Get Image URLs by Product ID
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         description: ID of the product to be retrieved
+   *         schema:
+   *           type: string
+   *     responses:
+   *       '200':
+   *         description: Successful images retrieval.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ImageURL'
+   *       '400':
+   *         description: Bad Request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/FileDoesNotExist'
+   */
+  private async getImages(
+    options: ApiHandlerOptions<{ params: { id: string } }>,
+  ): Promise<ApiHandlerResponse> {
+    const { id } = options.params;
+
+    const images: ImageUrl[] = await this.productsService.getImages(id);
+
+    return {
+      status: HttpCode.OK,
+      payload: images,
     };
   }
 

@@ -9,4 +9,19 @@ const getSkip = (query: PaginatedQuery): number =>
 const getTake = (query: PaginatedQuery, count: number): number =>
   isObjectEmpty(query) ? count : query.size;
 
-export { getSkip, getTake };
+const isNotEmptyString = (value: string): boolean =>
+  typeof value === 'string' && value.length > 0;
+
+const buildImageName = (title: string, filename: string): string => {
+  const formattedTitle = isNotEmptyString(title)
+    ? title.trim().toLowerCase()
+    : '';
+
+  const cleanedFilename = isNotEmptyString(title)
+    ? filename.replaceAll(/\.[^./]+$/g, '')
+    : '';
+
+  return `${formattedTitle.replaceAll(/\s+/g, '-')}-image-${cleanedFilename}`;
+};
+
+export { buildImageName, getSkip, getTake };
