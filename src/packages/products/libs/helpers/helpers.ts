@@ -9,8 +9,8 @@ const getSkip = (query: PaginatedQuery): number =>
 const getTake = (query: PaginatedQuery, count: number): number =>
   isObjectEmpty(query) ? count : query.size;
 
-const isNotEmptyString = (string_: string): boolean =>
-  typeof string_ === 'string' && string_.length > 0;
+const isNotEmptyString = (value: string): boolean =>
+  typeof value === 'string' && value.length > 0;
 
 const buildImageName = (title: string, filename: string): string => {
   const formattedTitle = isNotEmptyString(title)
