@@ -7,7 +7,7 @@ import { type PaginatedQuery } from '~/libs/types/types.js';
 
 import { type FilesService } from '../files/files.js';
 import { ProductValidationRules } from './libs/enums/product-validation-rules.enum.js';
-import { buildId, buildImageName } from './libs/helpers/helpers.js';
+import { getBuildId, getBuildImageName } from './libs/helpers/helpers.js';
 import {
   type CreateProductDto,
   type ImageUrl,
@@ -101,7 +101,7 @@ class ProductsService implements IService {
   }
 
   public async getTopCategories(): Promise<TopCategory[]> {
-    const subCategories: Subcategory[] = [
+    const subcategories: Subcategory[] = [
       'JACKETS',
       'SWEATERS',
       'OVERSHIRTS',
@@ -110,7 +110,7 @@ class ProductsService implements IService {
     const IMAGE_POSITION = 6;
     const topCategories: TopCategory[] = [];
 
-    for (const subcategory of subCategories) {
+    for (const subcategory of subcategories) {
       const [product] = await this.search(
         { subcategory },
         { size: 1, page: 0 },
@@ -124,7 +124,7 @@ class ProductsService implements IService {
 
         if (title && imageUrl) {
           topCategories.push({
-            id: buildId(title),
+            id: getBuildId(title),
             name: subcategory,
             url: imageUrl,
           });
@@ -155,7 +155,7 @@ class ProductsService implements IService {
       const file = await this.filesService.findById(id);
 
       if (file) {
-        const name = buildImageName(title, file.name);
+        const name = getBuildImageName(title, file.name);
 
         images.push({ id, name, url });
       }
