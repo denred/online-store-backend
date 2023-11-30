@@ -65,7 +65,7 @@ class SubscribersService {
     const { email, preferences } = payload;
 
     const subscription =
-      await this.subscribersRepository.getSubscriptionByEmailWithPrefernces(
+      await this.subscribersRepository.getSubscriptionByEmailWithPreferences(
         email,
       );
 

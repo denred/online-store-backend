@@ -39,7 +39,7 @@ class SubscribersRepository {
   }
 
   public async unsubscribe(email: string): Promise<boolean> {
-    let succes = false;
+    let success = false;
 
     await this.db.$transaction(async (tx) => {
       await tx.subscription.delete({
@@ -56,10 +56,10 @@ class SubscribersRepository {
         },
       });
 
-      succes = true;
+      success = true;
     });
 
-    return succes;
+    return success;
   }
 
   public async getSubscriptionByEmail(
@@ -68,7 +68,7 @@ class SubscribersRepository {
     return await this.db.subscription.findUnique({ where: { email } });
   }
 
-  public async getSubscriptionByEmailWithPrefernces(
+  public async getSubscriptionByEmailWithPreferences(
     email: string,
   ): Promise<SubscriptionWithPreferences | null> {
     return await this.db.subscription.findUnique({
