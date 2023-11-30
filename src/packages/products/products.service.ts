@@ -1,4 +1,4 @@
-import { type Product, type Subcategory } from '@prisma/client';
+import { type Product, Subcategory } from '@prisma/client';
 
 import { HttpError } from '~/libs/exceptions/http-error.exception.js';
 import { type IService } from '~/libs/interfaces/interfaces.js';
@@ -102,10 +102,10 @@ class ProductsService implements IService {
 
   public async getTopCategories(): Promise<TopCategory[]> {
     const subcategories: Subcategory[] = [
-      'JACKETS',
-      'SWEATERS',
-      'OVERSHIRTS',
-      'QUILTED',
+      Subcategory.JACKETS,
+      Subcategory.SWEATERS,
+      Subcategory.OVERSHIRTS,
+      Subcategory.QUILTED,
     ];
     const IMAGE_POSITION = 6;
     const topCategories: TopCategory[] = [];
