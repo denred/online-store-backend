@@ -8,6 +8,7 @@ generator client {
 generator erd {
   provider = "prisma-erd-generator"
   output   = "../ERD.svg"
+  disabled = true
 }
 
 datasource db {
@@ -144,4 +145,20 @@ model OrderItem {
 
   Order   Order   @relation(fields: [orderId], references: [id])
   product Product @relation(fields: [productId], references: [id])
+}
+
+model Subscription {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  email       String       @unique
+  firstName   String?
+  lastName    String?
+  preferences Preferences?
+}
+
+model Preferences {
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  receiveNewsletter Boolean      @default(false)
+  productUpdates    Boolean      @default(false)
+  subscriptionId    String       @unique @db.ObjectId
+  subscription      Subscription @relation(fields: [subscriptionId], references: [id])
 }
