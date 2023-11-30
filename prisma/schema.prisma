@@ -84,8 +84,9 @@ model Product {
   updateddAt   DateTime    @default(now()) @updatedAt
   files        String[]
   orderId      String?     @db.ObjectId
-  quantity     Int
-  OrderItem    OrderItem[]
+  quantity     Int         @default(5)
+
+  OrderItem OrderItem[]
 }
 
 model Review {
@@ -123,22 +124,21 @@ model Address {
 model Order {
   id         String      @id @default(auto()) @map("_id") @db.ObjectId
   userId     String      @db.ObjectId
-  OrderItems OrderItem[]
   totalPrice Float
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @default(now()) @updatedAt
+  orderItems OrderItem[]
 
   user User @relation(fields: [userId], references: [id])
 }
 
 model OrderItem {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  orderId   String   @db.ObjectId
-  productId String   @db.ObjectId
-  quantity  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  order   Order   @relation(fields: [orderId], references: [id])
+  orderId   String @db.ObjectId
+  productId String @db.ObjectId
+  quantity  Int
+
+  Order   Order   @relation(fields: [orderId], references: [id])
   product Product @relation(fields: [productId], references: [id])
 }
