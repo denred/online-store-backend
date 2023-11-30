@@ -5,6 +5,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../ERD.svg"
+}
+
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
@@ -90,10 +95,9 @@ model Product {
 }
 
 model Review {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  text   String
-  rating Float
-
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  text      String
+  rating    Float
   productId String @unique @db.ObjectId
 }
 
@@ -133,8 +137,7 @@ model Order {
 }
 
 model OrderItem {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
   orderId   String @db.ObjectId
   productId String @db.ObjectId
   quantity  Int
