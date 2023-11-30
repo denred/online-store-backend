@@ -1,4 +1,4 @@
-import { type Product } from '@prisma/client';
+import { type Product, Subcategory } from '@prisma/client';
 
 import { HttpError } from '~/libs/exceptions/http-error.exception.js';
 import { type IService } from '~/libs/interfaces/interfaces.js';
@@ -7,9 +7,12 @@ import { type PaginatedQuery } from '~/libs/types/types.js';
 
 import { type FilesService } from '../files/files.js';
 import { ProductValidationRules } from './libs/enums/product-validation-rules.enum.js';
-import { buildImageName } from './libs/helpers/helpers.js';
-import { type CreateProductDto } from './libs/types/create-product-dto.type.js';
-import { type ImageUrl } from './libs/types/types.js';
+import { getBuildId, getBuildImageName } from './libs/helpers/helpers.js';
+import {
+  type CreateProductDto,
+  type ImageUrl,
+  type TopCategory,
+} from './libs/types/types.js';
 import { type ProductsRepository } from './products.repository.js';
 
 class ProductsService implements IService {
@@ -97,6 +100,41 @@ class ProductsService implements IService {
     return true;
   }
 
+  public async getTopCategories(): Promise<TopCategory[]> {
+    const subcategories: Subcategory[] = [
+      Subcategory.JACKETS,
+      Subcategory.SWEATERS,
+      Subcategory.OVERSHIRTS,
+      Subcategory.QUILTED,
+    ];
+    const IMAGE_POSITION = 6;
+    const topCategories: TopCategory[] = [];
+
+    for (const subcategory of subcategories) {
+      const [product] = await this.search(
+        { subcategory },
+        { size: 1, page: 0 },
+      );
+
+      if (product) {
+        const { title, files } = product;
+        const imageUrl = files[IMAGE_POSITION]
+          ? await this.filesService.getUrlById(files[IMAGE_POSITION])
+          : null;
+
+        if (title && imageUrl) {
+          topCategories.push({
+            id: getBuildId(title),
+            name: subcategory,
+            url: imageUrl,
+          });
+        }
+      }
+    }
+
+    return topCategories;
+  }
+
   public async getImages(id: string): Promise<ImageUrl[]> {
     this.isValidPrismaId(id);
 
@@ -117,7 +155,7 @@ class ProductsService implements IService {
       const file = await this.filesService.findById(id);
 
       if (file) {
-        const name = buildImageName(title, file.name);
+        const name = getBuildImageName(title, file.name);
 
         images.push({ id, name, url });
       }
