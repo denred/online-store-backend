@@ -84,3 +84,20 @@ model File {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
 }
+
+model Subscription {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  email     String  @unique
+  firstName String?
+  lastName  String?
+
+  preferences Preferences?
+}
+
+model Preferences {
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  receiveNewsletter Boolean      @default(false)
+  productUpdates    Boolean      @default(false)
+  subscriptionId    String       @unique @db.ObjectId
+  subscription      Subscription @relation(fields: [subscriptionId], references: [id])
+}
