@@ -15,6 +15,27 @@ class UsersRepository implements IRepository {
     return await this.db.user.findUnique({ where: { id } });
   }
 
+  public async findUserByEmailOrPhone({
+    email,
+    phone,
+  }: {
+    email?: User['email'];
+    phone?: User['phone'];
+  }): Promise<User | null> {
+    return await this.db.user.findFirst({
+      where: {
+        OR: [
+          {
+            email,
+          },
+          {
+            phone,
+          },
+        ],
+      },
+    });
+  }
+
   public async create(payload: CreateUserDTO): Promise<User> {
     const { addresses, ...user } = payload;
 
@@ -23,10 +44,7 @@ class UsersRepository implements IRepository {
     });
   }
 
-  public async update(
-    id: string,
-    payload: Partial<UpdateUserDTO>,
-  ): Promise<User> {
+  public async update(id: string, payload: Partial<UpdateUserDTO>): Promise<User> {
     const { addresses, ...user } = payload;
 
     return await this.db.user.update({

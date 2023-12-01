@@ -89,7 +89,6 @@ model Product {
   createdAt    DateTime    @default(now())
   updateddAt   DateTime    @default(now()) @updatedAt
   files        String[]
-  orderId      String?     @db.ObjectId
   quantity     Int         @default(5)
 
   OrderItem OrderItem[]
