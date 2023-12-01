@@ -16,10 +16,16 @@ import {
 } from './libs/types/types.js';
 
 class OrdersRepository {
-  private db: Pick<PrismaClient, 'order' | '$transaction' | 'product'>;
+  private db: Pick<
+    PrismaClient,
+    'order' | '$transaction' | 'product' | 'orderItem'
+  >;
 
   public constructor(
-    database: Pick<PrismaClient, 'order' | '$transaction' | 'product'>,
+    database: Pick<
+      PrismaClient,
+      'order' | '$transaction' | 'product' | 'orderItem'
+    >,
   ) {
     this.db = database;
   }
@@ -184,6 +190,10 @@ class OrdersRepository {
     });
 
     return !!deletedOrder;
+  }
+
+  public async getOrderItemsByOrderId(id: string): Promise<OrderItem[]> {
+    return await this.db.orderItem.findMany({ where: { orderId: id } });
   }
 }
 

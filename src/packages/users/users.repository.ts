@@ -5,9 +5,9 @@ import { type IRepository } from '~/libs/interfaces/interfaces.js';
 import { type CreateUserDTO, type UpdateUserDTO } from './libs/types/types.js';
 
 class UsersRepository implements IRepository {
-  private db: Pick<PrismaClient, 'user'>;
+  private db: Pick<PrismaClient, 'user' | 'address'>;
 
-  public constructor(database: Pick<PrismaClient, 'user'>) {
+  public constructor(database: Pick<PrismaClient, 'user' | 'address'>) {
     this.db = database;
   }
 
@@ -44,7 +44,10 @@ class UsersRepository implements IRepository {
     });
   }
 
-  public async update(id: string, payload: Partial<UpdateUserDTO>): Promise<User> {
+  public async update(
+    id: string,
+    payload: Partial<UpdateUserDTO>,
+  ): Promise<User> {
     const { addresses, ...user } = payload;
 
     return await this.db.user.update({
@@ -64,6 +67,12 @@ class UsersRepository implements IRepository {
   }
 
   public async delete(id: string): Promise<boolean> {
+    await this.db.address.deleteMany({
+      where: {
+        userId: id,
+      },
+    });
+
     return !!(await this.db.user.delete({ where: { id } }));
   }
 }

@@ -1,4 +1,4 @@
-import { type User } from '@prisma/client';
+import { type User, UserStatus } from '@prisma/client';
 
 import { HttpError } from '~/libs/exceptions/http-error.exception.js';
 import { type IService } from '~/libs/interfaces/interfaces.js';
@@ -34,7 +34,7 @@ class UsersService implements IService {
 
     const user = await this.findUserByEmailOrPhone({ email, phone });
 
-    if (user) {
+    if (user && user.status !== UserStatus.NOT_REGISTERED) {
       throw new HttpError({
         status: HttpCode.FORBIDDEN,
         message: UsersErrorMessage.ALREADY_EXISTS,
@@ -44,7 +44,10 @@ class UsersService implements IService {
     return await this.usersRepository.create(payload);
   }
 
-  public async update(id: string, payload: Partial<UpdateUserDTO>): Promise<User> {
+  public async update(
+    id: string,
+    payload: Partial<UpdateUserDTO>,
+  ): Promise<User> {
     const { email, phone } = payload;
 
     const existingUser = await this.findById(id);
@@ -56,7 +59,10 @@ class UsersService implements IService {
       });
     }
 
-    const userWithSameEmailOrPhone = await this.findUserByEmailOrPhone({ email, phone });
+    const userWithSameEmailOrPhone = await this.findUserByEmailOrPhone({
+      email,
+      phone,
+    });
 
     if (userWithSameEmailOrPhone && userWithSameEmailOrPhone.id !== id) {
       throw new HttpError({
