@@ -145,9 +145,10 @@ class OrdersRepository {
             userId,
             totalPrice,
             orderItems: {
-              createMany: {
-                data: [...orderItems],
-              },
+              updateMany: orderItems.map((item) => ({
+                where: { productId: item.productId },
+                data: { productId: item.productId, quantity: item.quantity },
+              })),
             },
           },
           include: {
@@ -188,6 +189,12 @@ class OrdersRepository {
       for (const orderItem of orderItems) {
         await this.updateProductQuantity({ tx, orderItem, deletionFlag: true });
       }
+
+      await tx.orderItem.deleteMany({
+        where: {
+          orderId,
+        },
+      });
 
       return await tx.order.delete({
         where: { id: orderId },

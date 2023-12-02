@@ -1,14 +1,11 @@
 import joi from 'joi';
 
+import { getStringValidationSchema } from '~/libs/helpers/helpers.js';
+
 import { ErrorMessage } from '../enums/enums.js';
 
-const stringSchema = (message: string): joi.StringSchema =>
-  joi.string().required().messages({
-    'string': message,
-  });
-
 const productParametersSchema = joi.object<{ id: string }, true>({
-  id: stringSchema(ErrorMessage.ID_INVALID),
+  id: getStringValidationSchema(ErrorMessage.ID_INVALID),
 });
 
 export { productParametersSchema };

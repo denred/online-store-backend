@@ -1,4 +1,4 @@
-import { type Order, UserStatus } from '@prisma/client';
+import { type Address, type Order, UserStatus } from '@prisma/client';
 
 import { HttpError } from '~/libs/exceptions/http-error.exception.js';
 import { type IService } from '~/libs/interfaces/interfaces.js';
@@ -13,7 +13,7 @@ import {
 } from './libs/helpers/helpers.js';
 import {
   type CreateOrderDTO,
-  type UpdateOrderPayload,
+  type UpdateOrderDTO,
 } from './libs/types/types.js';
 import { type OrdersRepository } from './orders.repository.js';
 
@@ -37,11 +37,10 @@ class OrdersService implements IService {
   public async create(payload: CreateOrderDTO): Promise<Order> {
     const { user, orderDelivery, orderItems } = payload;
 
-    const mappedOrderItems = await getMappedOrderItems(
+    const totalPrice = await getOrderTotalPrice(
       orderItems,
       this.productsService,
     );
-    const totalPrice = getOrderTotalPrice(mappedOrderItems);
 
     const createdUser = await this.usersService.create({
       ...user,
@@ -63,14 +62,7 @@ class OrdersService implements IService {
     }
   }
 
-  public async findById(id: string): Promise<Order | null> {
-    return await this.ordersRepository.getOrderById(id);
-  }
-
-  public async update(
-    id: string,
-    payload: Partial<UpdateOrderPayload>,
-  ): Promise<Order> {
+  private async findByIdOrThrow(id: string): Promise<Order> {
     const order = await this.findById(id);
 
     if (!order) {
@@ -80,40 +72,56 @@ class OrdersService implements IService {
       });
     }
 
-    const { orderItems } = payload;
+    return order;
+  }
+
+  public async findById(id: string): Promise<Order | null> {
+    return await this.ordersRepository.getOrderById(id);
+  }
+
+  public async update(id: string, payload: UpdateOrderDTO): Promise<Order> {
+    const { orderItems, orderDelivery, user } = payload;
+
+    const order = await this.findByIdOrThrow(id);
 
     const { id: orderId, userId } = order;
 
-    let totalPrice = order.totalPrice;
+    (user || orderDelivery) &&
+      (await this.usersService.update(userId, {
+        ...user,
+        addresses: [
+          orderDelivery as Omit<
+            Address,
+            'id' | 'userId' | 'createdAt' | 'updatedAt'
+          >,
+        ],
+      }));
+
+    const totalPrice =
+      orderItems && orderItems.length > 0
+        ? await getOrderTotalPrice(orderItems, this.productsService)
+        : order.totalPrice;
 
     const existingOrderItems =
       await this.ordersRepository.getOrderItemsByOrderId(orderId);
-
-    let mappedExistingOrderItems = existingOrderItems.map((item) => {
-      const { productId, quantity } = item;
-
-      return { productId, quantity };
-    });
-
-    if (orderItems) {
-      const mappedOrderItems = await getMappedOrderItems(
-        orderItems,
-        this.productsService,
-      );
-      totalPrice = getOrderTotalPrice(mappedOrderItems);
-      mappedExistingOrderItems = orderItems;
-    }
 
     return await this.ordersRepository.updateOrder({
       userId,
       orderId,
       totalPrice,
-      orderItems: mappedExistingOrderItems,
+      orderItems: orderItems ?? getMappedOrderItems(existingOrderItems),
     });
   }
 
   public async delete(id: string): Promise<boolean> {
-    return await this.ordersRepository.deleteOrder(id);
+    const order = await this.findById(id);
+    const status = await this.ordersRepository.deleteOrder(id);
+
+    if (order && status) {
+      await this.usersService.delete(order.userId);
+    }
+
+    return status;
   }
 }
 

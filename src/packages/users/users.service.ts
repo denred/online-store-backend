@@ -48,7 +48,7 @@ class UsersService implements IService {
     id: string,
     payload: Partial<UpdateUserDTO>,
   ): Promise<User> {
-    const { email, phone } = payload;
+    const { email, phone, addresses } = payload;
 
     const existingUser = await this.findById(id);
 
@@ -71,7 +71,10 @@ class UsersService implements IService {
       });
     }
 
-    return await this.usersRepository.update(id, payload);
+    return await this.usersRepository.update(id, {
+      ...payload,
+      addresses: addresses,
+    });
   }
 
   public async delete(id: string): Promise<boolean> {

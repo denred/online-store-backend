@@ -12,7 +12,10 @@ class UsersRepository implements IRepository {
   }
 
   public async findById(id: string): Promise<User | null> {
-    return await this.db.user.findUnique({ where: { id } });
+    return await this.db.user.findUnique({
+      where: { id },
+      include: { addresses: true },
+    });
   }
 
   public async findUserByEmailOrPhone({
@@ -50,19 +53,22 @@ class UsersRepository implements IRepository {
   ): Promise<User> {
     const { addresses, ...user } = payload;
 
+    const updateData = {
+      ...user,
+      ...(addresses &&
+        !addresses.every((it) => it === undefined) && {
+          addresses: {
+            updateMany: addresses.map((address) => ({
+              where: { userId: id },
+              data: address,
+            })),
+          },
+        }),
+    };
+
     return await this.db.user.update({
       where: { id },
-      data: {
-        ...user,
-        addresses: addresses
-          ? {
-              updateMany: addresses.map((address) => ({
-                where: { id: address.id },
-                data: address,
-              })),
-            }
-          : undefined,
-      },
+      data: updateData,
     });
   }
 
