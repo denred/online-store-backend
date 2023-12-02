@@ -54,6 +54,8 @@ import { type ProductsService } from './products.service.js';
  *           type: string
  *         manufacturer:
  *           type: string
+ *         quantity:
+ *           type: integer
  *         files:
  *           type: array
  *           items:
@@ -93,6 +95,9 @@ import { type ProductsService } from './products.service.js';
  *         manufacturer:
  *           type: string
  *           example: Bangladesh
+ *         quantity:
+ *           type: integer
+ *           example: 5
  *         files:
  *           type: array
  *           items:

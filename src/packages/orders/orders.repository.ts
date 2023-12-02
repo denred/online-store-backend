@@ -41,16 +41,18 @@ class OrdersRepository {
       '$transaction' | '$on' | '$connect' | '$disconnect' | '$use' | '$extends'
     >;
     orderItem: Pick<OrderItem, 'productId' | 'quantity'>;
-    existingOrderItems?: OrderItem[];
+    existingOrderItems?: Pick<OrderItem, 'productId' | 'quantity'>[];
     deletionFlag?: true;
   }): Promise<void> {
     const { productId, quantity } = orderItem;
+
     const existingProduct = await tx.product.findUnique({
       where: { id: productId },
     });
 
-    const { quantity: existingOrderQuantity = 0 } =
-      existingOrderItems?.find((it) => it.productId === productId) ?? {};
+    const { quantity: existingOrderQuantity } = existingOrderItems?.find(
+      (it) => it.productId === productId,
+    ) ?? { quantity: 0 };
 
     if (
       !existingProduct ||
@@ -97,7 +99,10 @@ class OrdersRepository {
         });
 
         for (const orderItem of orderItems) {
-          await this.updateProductQuantity({ tx, orderItem });
+          await this.updateProductQuantity({
+            tx,
+            orderItem,
+          });
         }
 
         return order;

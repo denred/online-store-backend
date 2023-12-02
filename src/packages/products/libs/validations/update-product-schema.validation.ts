@@ -65,6 +65,15 @@ const updateProductSchema = Joi.object({
     'string.max': ErrorMessage.MAX_LENGTH,
   }),
   files: Joi.array().items(Joi.string()),
+  quantity: Joi.number()
+    .positive()
+    .integer()
+    .max(ProductValidationRules.MAX_QUANTITY)
+    .messages({
+      'number.base': ErrorMessage.QUANTITY_INVALID,
+      'number.min': ErrorMessage.QUANTITY_INVALID,
+      'number.max': ErrorMessage.QUANTITY_INVALID,
+    }),
 });
 
 export { updateProductSchema };

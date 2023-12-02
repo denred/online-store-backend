@@ -87,9 +87,9 @@ model Product {
   collection   String?
   manufacturer String?
   createdAt    DateTime    @default(now())
-  updateddAt   DateTime    @default(now()) @updatedAt
+  updatedAt    DateTime    @default(now()) @updatedAt
   files        String[]
-  quantity     Int         @default(5)
+  quantity     Int
 
   OrderItem OrderItem[]
 }

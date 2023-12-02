@@ -9,6 +9,7 @@ import { type ILogger } from '~/libs/packages/logger/logger.js';
 
 import { OrdersApiPath } from './libs/enums/enums.js';
 import { type CreateOrderDTO } from './libs/types/types.js';
+import { createOrderSchema } from './libs/validations/validations.js';
 import { type OrdersService } from './orders.service.js';
 
 /**
@@ -29,20 +30,20 @@ import { type OrdersService } from './orders.service.js';
  *           example: "+380111111111"
  *         email:
  *           type: string
- *           example: "example@mail.ua"
+ *           example: "john@gmail.com"
  *
  *     OrderDelivery:
  *       type: object
  *       properties:
  *         address:
  *           type: string
- *           example: "First avenue"
+ *           example: "132, My Street"
  *         moreInfo:
  *           type: string
- *           example: "I need help"
+ *           example: "Additional information (optional)"
  *         zipCode:
  *           type: string
- *           example: "52001"
+ *           example: "12401"
  *         city:
  *           type: string
  *           example: "Kyiv"
@@ -102,7 +103,9 @@ class OrdersController extends Controller {
     this.addRoute({
       path: OrdersApiPath.ROOT,
       method: 'POST',
-      validation: {},
+      validation: {
+        body: createOrderSchema,
+      },
       handler: (options) =>
         this.createOrder(
           options as ApiHandlerOptions<{ body: CreateOrderDTO }>,
