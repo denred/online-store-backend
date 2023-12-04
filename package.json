@@ -4,7 +4,7 @@
   "type": "module",
   "engines": {
     "node": "20.x.x",
-    "npm": "9.x.x"
+    "npm": "10.x.x"
   },
   "version": "0.0.1",
   "scripts": {
@@ -38,6 +38,7 @@
     "joi": "^17.11.0",
     "jose": "^5.1.1",
     "mime-types": "^2.1.35",
+    "nodemailer": "^6.9.7",
     "pino": "^8.16.2",
     "pino-pretty": "^10.2.3",
     "react-dropzone": "^14.2.3",
