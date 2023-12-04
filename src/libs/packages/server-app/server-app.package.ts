@@ -28,6 +28,7 @@ import { type EnvironmentSchema } from '../config/types/types.js';
 import { type ValidateFilesStrategyOptions } from '../controller/types/validate-files-strategy-options.type.js';
 import { HttpCode } from '../http/enums/enums.js';
 import { type ILogger } from '../logger/logger.js';
+import { FileSizeBytes } from './enums/enums.js';
 import {
   type IServerApp,
   type IServerAppApi,
@@ -217,7 +218,7 @@ class ServerApp implements IServerApp {
     await this.app.register(fastifyMultipart, {
       attachFieldsToBody: true,
       limits: {
-        fileSize: 10 * 1024 * 1024,
+        fileSize: FileSizeBytes.TEN_MEGABYTES,
       },
     });
   }
