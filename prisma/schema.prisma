@@ -11,13 +11,13 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  firstName  String?
-  lastName   String?
-  email      String
-  hash       String
-  createdAt  DateTime @default(now())
-  updateddAt DateTime @default(now()) @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  firstName String?
+  lastName  String?
+  email     String
+  hash      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Product {
@@ -34,7 +34,7 @@ model Product {
   collection   String?
   manufacturer String?
   createdAt    DateTime    @default(now())
-  updateddAt   DateTime    @default(now()) @updatedAt
+  updatedAt    DateTime    @default(now()) @updatedAt
   files        String[]
 }
 

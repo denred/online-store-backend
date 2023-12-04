@@ -2,8 +2,10 @@ import convict, { type Config as TConfig } from 'convict';
 import { config } from 'dotenv';
 
 import { AppEnvironment } from '~/libs/enums/enums.js';
+import { ConfigValidationError } from '~/libs/exceptions/exceptions.js';
 
 import { type ILogger } from '../logger/logger.js';
+import { FormatRegex } from './enums/enums.js';
 import { type IConfig } from './interfaces/interfaces.js';
 import { type EnvironmentSchema } from './types/types.js';
 
@@ -28,6 +30,28 @@ class Config implements IConfig<EnvironmentSchema> {
   }
 
   private get envSchema(): TConfig<EnvironmentSchema> {
+    convict.addFormat({
+      name: 'boolean_string',
+      validate: (value: string, schema: convict.SchemaObj) => {
+        if (value !== 'true' && value !== 'false') {
+          throw new ConfigValidationError({
+            message: `Invalid ${schema.env ?? ''} format`,
+          });
+        }
+      },
+    });
+
+    convict.addFormat({
+      name: 'email',
+      validate: (value: string, schema: convict.SchemaObj) => {
+        if (!FormatRegex.EMAIL.test(value)) {
+          throw new ConfigValidationError({
+            message: `Invalid ${schema.env ?? ''} format`,
+          });
+        }
+      },
+    });
+
     return convict<EnvironmentSchema>({
       APP: {
         ENVIRONMENT: {
@@ -75,6 +99,32 @@ class Config implements IConfig<EnvironmentSchema> {
             env: 'SIGNED_URL_EXPIRES_IN_SECONDS',
             default: null,
           },
+        },
+      },
+      MAILER: {
+        SENDGRID_API_KEY: {
+          doc: 'Twilio SendGrid API key',
+          format: String,
+          env: 'SENDGRID_API_KEY',
+          default: null,
+        },
+        SENDGRID_USER: {
+          doc: 'Twilio SendGrid SMTP username',
+          format: String,
+          env: 'SENDGRID_USER',
+          default: 'apikey',
+        },
+        SMTP_TLS: {
+          doc: 'Whether SMTP connection uses TLS',
+          env: 'SMTP_TLS',
+          format: 'boolean_string',
+          default: true,
+        },
+        SENDGRID_SENDER_EMAIL: {
+          doc: 'Sendgrid verified sender email',
+          env: 'SENDGRID_SENDER_EMAIL',
+          format: 'email',
+          default: null,
         },
       },
     });
