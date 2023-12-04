@@ -1,11 +1,7 @@
 import { type Product } from '@prisma/client';
 
 import { ApiPath } from '~/libs/enums/enums.js';
-import {
-  type ApiHandlerOptions,
-  type ApiHandlerResponse,
-  Controller,
-} from '~/libs/packages/controller/controller.js';
+import { type ApiHandlerOptions, type ApiHandlerResponse, Controller } from '~/libs/packages/controller/controller.js';
 import { HttpCode } from '~/libs/packages/http/enums/enums.js';
 import { type ILogger } from '~/libs/packages/logger/interfaces/interfaces.js';
 import { type PaginatedQuery } from '~/libs/types/types.js';
@@ -14,11 +10,7 @@ import { commonGetPageQuery } from '~/libs/validations/validations.js';
 import { ProductsApiPath } from './libs/enums/enums.js';
 import { type CreateProductDto } from './libs/types/create-product-dto.type.js';
 import { type ImageUrl } from './libs/types/types.js';
-import {
-  createProductSchema,
-  productParametersSchema,
-  updateProductSchema,
-} from './libs/validations/validations.js';
+import { createProductSchema, productParametersSchema, updateProductSchema } from './libs/validations/validations.js';
 import { type ProductsService } from './products.service.js';
 
 /**
@@ -59,7 +51,7 @@ import { type ProductsService } from './products.service.js';
  *           items:
  *             type: string
  *             format: binary
- *             example: "id"
+ *             example: 'id'
  *
  *     CreateProductBody:
  *       type: object
@@ -167,7 +159,7 @@ import { type ProductsService } from './products.service.js';
  *             - COMMON
  *             - VALIDATION
  *
- *     FileDoesNotExist:
+ *     ProductFileDoesNotExist:
  *       allOf:
  *         - $ref: '#/components/schemas/ErrorType'
  *         - type: object
@@ -177,7 +169,7 @@ import { type ProductsService } from './products.service.js';
  *               enum:
  *                 - File with such id does not exist!
  *
- *     ValidationError:
+ *     ProductValidationError:
  *       allOf:
  *         - $ref: '#/components/schemas/ErrorType'
  *         - type: object
@@ -188,17 +180,16 @@ import { type ProductsService } from './products.service.js';
  *                 - Product isn't valid!
  *
  *     TopCategory:
- *       type: object;
+ *       type: object
  *       properties:
  *         id:
  *           type: string
  *           example: basic_denim_jacket
  *         name:
- *           schemas: $ref: '#/components/schemas/Subcategory'
+ *           $ref: '#/components/schemas/Subcategory'
  *         url:
  *           type: string
  *           example: 'https://imgbucketonline.s3.eu-north-1.amazonaws.com//4963b077-b3ac-4ab0-a027-ec9a23bab23d?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6AT3X3LBYHSX3HMJ%2F20231128%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20231128T072832Z&X-Amz-Expires=3600&X-Amz-Signature=fbb0eccc5dbec7c08513ebc8103a5d6b3b24ff1c108ac594bbecca54dcd7eb11&X-Amz-SignedHeaders=host&x-id=GetObject'
- *
  *
  *     ImageURL:
  *       type: object
@@ -225,8 +216,7 @@ class ProductsController extends Controller {
       validation: {
         body: createProductSchema,
       },
-      handler: (options) =>
-        this.create(options as ApiHandlerOptions<{ body: CreateProductDto }>),
+      handler: (options) => this.create(options as ApiHandlerOptions<{ body: CreateProductDto }>),
     });
 
     this.addRoute({
@@ -235,8 +225,7 @@ class ProductsController extends Controller {
       validation: {
         query: commonGetPageQuery,
       },
-      handler: (options) =>
-        this.findAll(options as ApiHandlerOptions<{ query: PaginatedQuery }>),
+      handler: (options) => this.findAll(options as ApiHandlerOptions<{ query: PaginatedQuery }>),
     });
 
     this.addRoute({
@@ -276,8 +265,7 @@ class ProductsController extends Controller {
         params: productParametersSchema,
         query: commonGetPageQuery,
       },
-      handler: (options) =>
-        this.delete(options as ApiHandlerOptions<{ params: { id: string } }>),
+      handler: (options) => this.delete(options as ApiHandlerOptions<{ params: { id: string } }>),
     });
 
     this.addRoute({
@@ -308,10 +296,7 @@ class ProductsController extends Controller {
       validation: {
         params: productParametersSchema,
       },
-      handler: (options) =>
-        this.getImages(
-          options as ApiHandlerOptions<{ params: { id: string } }>,
-        ),
+      handler: (options) => this.getImages(options as ApiHandlerOptions<{ params: { id: string } }>),
     });
 
     this.addRoute({
@@ -349,13 +334,13 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/ValidationError'
+   *               $ref: '#/components/schemas/ProductValidationError'
    *       400:
    *         description: Bad Request
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/FileDoesNotExist'
+   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
    */
   private async create(
     options: ApiHandlerOptions<{
@@ -401,9 +386,7 @@ class ProductsController extends Controller {
    *               items:
    *                 $ref: '#/components/schemas/Product'
    */
-  private async findAll(
-    options: ApiHandlerOptions<{ query: PaginatedQuery }>,
-  ): Promise<ApiHandlerResponse> {
+  private async findAll(options: ApiHandlerOptions<{ query: PaginatedQuery }>): Promise<ApiHandlerResponse> {
     const products = await this.productsService.findAll(options.query);
 
     return {
@@ -439,11 +422,9 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/FileDoesNotExist'
+   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
    */
-  private async findById(
-    options: ApiHandlerOptions<{ params: { id: string } }>,
-  ): Promise<ApiHandlerResponse> {
+  private async findById(options: ApiHandlerOptions<{ params: { id: string } }>): Promise<ApiHandlerResponse> {
     const { id } = options.params;
     const product = await this.productsService.findById(id);
 
@@ -520,9 +501,7 @@ class ProductsController extends Controller {
    *       '404':
    *         description: Product not found.
    */
-  private async delete(
-    options: ApiHandlerOptions<{ params: { id: string } }>,
-  ): Promise<ApiHandlerResponse> {
+  private async delete(options: ApiHandlerOptions<{ params: { id: string } }>): Promise<ApiHandlerResponse> {
     const { id } = options.params;
 
     const status = await this.productsService.delete(id);
@@ -574,13 +553,13 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/ValidationError'
+   *               $ref: '#/components/schemas/ProductValidationError'
    *       400:
    *         description: Bad Request
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/FileDoesNotExist'
+   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
    */
   private async search(
     options: ApiHandlerOptions<{
@@ -651,11 +630,9 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/FileDoesNotExist'
+   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
    */
-  private async getImages(
-    options: ApiHandlerOptions<{ params: { id: string } }>,
-  ): Promise<ApiHandlerResponse> {
+  private async getImages(options: ApiHandlerOptions<{ params: { id: string } }>): Promise<ApiHandlerResponse> {
     const { id } = options.params;
 
     const images: ImageUrl[] = await this.productsService.getImages(id);
