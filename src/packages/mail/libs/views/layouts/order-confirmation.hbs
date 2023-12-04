@@ -1,0 +1,58 @@
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Order Confirmation</title>
+  </head>
+
+  <body>
+    <div
+      style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: 'Arial', sans-serif;"
+    >
+
+      <h2>Order Confirmation</h2>
+
+      <p>Dear {{customer}},</p>
+
+      <p>Thank you for your order. We are pleased to confirm that your order has
+        been received and is currently being processed.</p>
+
+      <h3>Order Details:</h3>
+      <ul>
+        <li>Order Number: {{orderNumber}}</li>
+        <li>Date: {{orderDate}}</li>
+        <li>Total Amount: {{orderTotalPrice}}</li>
+      </ul>
+
+      <h3>Shipping Information:</h3>
+      <p>Shipping Address: {{address}}</p>
+
+      <h3>Payment Information:</h3>
+      <p>Payment Method: {{payment}}</p>
+
+      <h3>Ordered Items:</h3>
+      <table style='width: 100%; border-collapse: collapse;'>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{orderItems}}
+        </tbody>
+      </table>
+
+      <p>If you have any questions about your order, please contact our customer
+        support at
+        {{contactEmail}}.</p>
+
+      <p>Thank you for shopping with us!</p>
+
+      <p>Sincerely,<br /> Nova</p>
+
+    </div>
+  </body>
+
+</html>
