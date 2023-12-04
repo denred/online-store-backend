@@ -61,7 +61,7 @@ import { type ProductsService } from './products.service.js';
  *           items:
  *             type: string
  *             format: binary
- *             example: "id"
+ *             example: 'id'
  *
  *     CreateProductBody:
  *       type: object
@@ -172,7 +172,7 @@ import { type ProductsService } from './products.service.js';
  *             - COMMON
  *             - VALIDATION
  *
- *     FileDoesNotExist:
+ *     ProductFileDoesNotExist:
  *       allOf:
  *         - $ref: '#/components/schemas/ErrorType'
  *         - type: object
@@ -182,7 +182,7 @@ import { type ProductsService } from './products.service.js';
  *               enum:
  *                 - File with such id does not exist!
  *
- *     ValidationError:
+ *     ProductValidationError:
  *       allOf:
  *         - $ref: '#/components/schemas/ErrorType'
  *         - type: object
@@ -198,12 +198,11 @@ import { type ProductsService } from './products.service.js';
  *         id:
  *           type: string
  *           example: basic_denim_jacket
- *         subcategory:
+ *         name:
  *           $ref: '#/components/schemas/Subcategory'
  *         url:
  *           type: string
  *           example: 'https://imgbucketonline.s3.eu-north-1.amazonaws.com//4963b077-b3ac-4ab0-a027-ec9a23bab23d?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6AT3X3LBYHSX3HMJ%2F20231128%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20231128T072832Z&X-Amz-Expires=3600&X-Amz-Signature=fbb0eccc5dbec7c08513ebc8103a5d6b3b24ff1c108ac594bbecca54dcd7eb11&X-Amz-SignedHeaders=host&x-id=GetObject'
- *
  *
  *     ImageURL:
  *       type: object
@@ -354,13 +353,13 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/ValidationError'
+   *               $ref: '#/components/schemas/ProductValidationError'
    *       400:
    *         description: Bad Request
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/FileDoesNotExist'
+   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
    */
   private async create(
     options: ApiHandlerOptions<{
@@ -444,7 +443,7 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/FileDoesNotExist'
+   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
    */
   private async findById(
     options: ApiHandlerOptions<{ params: { id: string } }>,
@@ -579,13 +578,13 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/ValidationError'
+   *               $ref: '#/components/schemas/ProductValidationError'
    *       400:
    *         description: Bad Request
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/FileDoesNotExist'
+   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
    */
   private async search(
     options: ApiHandlerOptions<{
@@ -656,7 +655,7 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/FileDoesNotExist'
+   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
    */
   private async getImages(
     options: ApiHandlerOptions<{ params: { id: string } }>,
