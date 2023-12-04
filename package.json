@@ -4,7 +4,7 @@
   "type": "module",
   "engines": {
     "node": "20.x.x",
-    "npm": "9.x.x"
+    "npm": "10.x.x"
   },
   "version": "0.0.1",
   "scripts": {
