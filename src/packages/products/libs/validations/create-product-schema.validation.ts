@@ -2,6 +2,7 @@ import { Category, Colour, Size, Subcategory } from '@prisma/client';
 import Joi from 'joi';
 
 import { ErrorMessage, ProductValidationRules } from '../enums/enums.js';
+import { quantitySchema } from './product-quantity-schema.validation.js';
 
 const createProductSchema = Joi.object({
   category: Joi.string()
@@ -84,17 +85,7 @@ const createProductSchema = Joi.object({
     'string.max': ErrorMessage.MAX_LENGTH,
   }),
   files: Joi.array().items(Joi.string()),
-  quantity: Joi.number()
-    .positive()
-    .integer()
-    .max(ProductValidationRules.MAX_QUANTITY)
-    .required()
-    .messages({
-      'number.base': ErrorMessage.QUANTITY_INVALID,
-      'number.min': ErrorMessage.QUANTITY_INVALID,
-      'number.max': ErrorMessage.QUANTITY_INVALID,
-      'any.required': ErrorMessage.REQUIRED,
-    }),
+  quantity: quantitySchema,
 });
 
 export { createProductSchema };
