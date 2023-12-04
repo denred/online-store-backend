@@ -193,7 +193,7 @@ import { type ProductsService } from './products.service.js';
  *         id:
  *           type: string
  *           example: basic_denim_jacket
- *         subcategory:
+ *         name:
  *           $ref: '#/components/schemas/Subcategory'
  *         url:
  *           type: string
