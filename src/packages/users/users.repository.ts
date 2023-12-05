@@ -2,7 +2,11 @@ import { type PrismaClient, type User } from '@prisma/client';
 
 import { type IRepository } from '~/libs/interfaces/interfaces.js';
 
-import { type CreateUserDTO, type UpdateUserDTO } from './libs/types/types.js';
+import {
+  type CreateUserDTO,
+  type UpdateUserDTO,
+  type UserRegisterModel,
+} from './libs/types/types.js';
 
 class UsersRepository implements IRepository {
   private db: Pick<PrismaClient, 'user' | 'address'>;
@@ -80,6 +84,12 @@ class UsersRepository implements IRepository {
     });
 
     return !!(await this.db.user.delete({ where: { id } }));
+  }
+
+  public async registerNewUser(payload: UserRegisterModel): Promise<User> {
+    return await this.db.user.create({
+      data: payload,
+    });
   }
 }
 

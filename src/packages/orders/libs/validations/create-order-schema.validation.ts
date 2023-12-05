@@ -1,50 +1,11 @@
 import Joi from 'joi';
 
+import { userCreateCommonValidationSchema } from '~/packages/users/users.js';
+
 import { OrderErrorMessage, OrdersValidationRules } from '../enums/enums.js';
 
 const createOrderSchema = Joi.object({
-  user: Joi.object({
-    firstName: Joi.string()
-      .min(OrdersValidationRules.NAME_MIN_LENGTH)
-      .max(OrdersValidationRules.NAME_MAX_LENGTH)
-      .required()
-      .messages({
-        'string.base': OrderErrorMessage.FIELD_REQUIRED,
-        'string.empty': OrderErrorMessage.FIELD_REQUIRED,
-        'string.min': OrderErrorMessage.FIELD_MIN_LENGTH,
-        'string.max': OrderErrorMessage.FIELD_MAX_LENGTH,
-        'any.required': OrderErrorMessage.FIELD_REQUIRED,
-      }),
-
-    lastName: Joi.string()
-      .min(OrdersValidationRules.NAME_MIN_LENGTH)
-      .max(OrdersValidationRules.NAME_MAX_LENGTH)
-      .required()
-      .messages({
-        'string.base': OrderErrorMessage.STRING_BASE,
-        'string.empty': OrderErrorMessage.FIELD_REQUIRED,
-        'string.min': OrderErrorMessage.FIELD_MIN_LENGTH,
-        'string.max': OrderErrorMessage.FIELD_MAX_LENGTH,
-        'any.required': OrderErrorMessage.FIELD_REQUIRED,
-      }),
-
-    phone: Joi.string()
-      .pattern(OrdersValidationRules.PHONE_PATTERN)
-      .required()
-      .messages({
-        'string.base': OrderErrorMessage.STRING_BASE,
-        'string.empty': OrderErrorMessage.FIELD_REQUIRED,
-        'string.pattern.base': OrderErrorMessage.PHONE_INVALID,
-        'any.required': OrderErrorMessage.FIELD_REQUIRED,
-      }),
-
-    email: Joi.string().email().required().messages({
-      'string.base': OrderErrorMessage.STRING_BASE,
-      'string.empty': OrderErrorMessage.FIELD_REQUIRED,
-      'string.email': OrderErrorMessage.EMAIL_INVALID,
-      'any.required': OrderErrorMessage.FIELD_REQUIRED,
-    }),
-  }).required(),
+  user: Joi.object({ ...userCreateCommonValidationSchema }).required(),
 
   orderDelivery: Joi.object({
     address: Joi.string()

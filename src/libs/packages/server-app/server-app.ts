@@ -1,5 +1,6 @@
 import { type FastifyInstance } from 'fastify';
 
+import { authController } from '~/packages/auth/auth.js';
 import { filesController } from '~/packages/files/files.js';
 import { ordersController } from '~/packages/orders/orders.js';
 import { productsController } from '~/packages/products/products.js';
@@ -22,6 +23,7 @@ async function initServer(): Promise<FastifyInstance> {
       ...filesController.routes,
       ...subscribersController.routes,
       ...ordersController.routes,
+      ...authController.routes,
     );
 
     server = new ServerApp({ config, logger, database, apis: [apiV1] });

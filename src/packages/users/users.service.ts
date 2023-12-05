@@ -1,9 +1,13 @@
-import { type User, UserStatus } from '@prisma/client';
+import { type User, UserRole, UserStatus } from '@prisma/client';
 
 import { HttpError } from '~/libs/exceptions/http-error.exception.js';
-import { type IService } from '~/libs/interfaces/interfaces.js';
+import { type IEncrypt, type IService } from '~/libs/interfaces/interfaces.js';
 import { HttpCode } from '~/libs/packages/http/http.js';
 
+import {
+  type UserSignUpRequestDTO,
+  type UserSignUpResponseDTO,
+} from '../auth/libs/types/types.js';
 import { UsersErrorMessage } from './libs/enums/enums.js';
 import { type CreateUserDTO, type UpdateUserDTO } from './libs/types/types.js';
 import { type UsersRepository } from './users.repository.js';
@@ -11,8 +15,14 @@ import { type UsersRepository } from './users.repository.js';
 class UsersService implements IService {
   private usersRepository: UsersRepository;
 
-  public constructor(usersRepository: UsersRepository) {
+  private encryptService: IEncrypt;
+
+  public constructor(
+    usersRepository: UsersRepository,
+    encryptService: IEncrypt,
+  ) {
     this.usersRepository = usersRepository;
+    this.encryptService = encryptService;
   }
 
   public async findById(id: string): Promise<User | null> {
@@ -42,6 +52,25 @@ class UsersService implements IService {
     }
 
     return await this.usersRepository.create(payload);
+  }
+
+  public async registerNewUser(
+    payload: UserSignUpRequestDTO,
+  ): Promise<UserSignUpResponseDTO> {
+    const { password, ...user } = payload;
+    const { hash: passHash, salt: passSalt } =
+      await this.encryptService.generate(password);
+
+    const { hash, salt, ...createdUser } =
+      await this.usersRepository.registerNewUser({
+        ...user,
+        hash: passHash,
+        salt: passSalt,
+        status: UserStatus.ACTIVE,
+        role: UserRole.USER,
+      });
+
+    return createdUser;
   }
 
   public async update(
