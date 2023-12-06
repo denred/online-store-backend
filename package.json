@@ -4,17 +4,18 @@
   "type": "module",
   "engines": {
     "node": "20.x.x",
-    "npm": "9.x.x"
+    "npm": "10.x.x"
   },
   "version": "0.0.1",
   "scripts": {
     "generate": "npx prisma generate",
     "lint:editor": "editorconfig-checker",
     "lint:fs": "ls-lint",
-    "build": "npm run generate && npx tsc && tsc-alias -p tsconfig.json",
+    "build": "npm run generate && npx tsc && tsc-alias -p tsconfig.json && npm run prepare-build",
     "start:dev": "nodemon --exec \"node --loader ts-paths-esm-loader --no-warnings\" src/index.ts",
     "start": "npm run generate && npm run build && node build/index.js",
-    "start:vercel": "vercel dev"
+    "start:vercel": "vercel dev",
+    "prepare-build": "sh ./prepare-build.sh"
   },
   "author": "Denis Redkin",
   "license": "MIT",
@@ -35,9 +36,11 @@
     "fastify-plugin": "^4.5.1",
     "fastify-raw-body": "^4.3.0",
     "filesize": "^10.1.0",
+    "handlebars": "^4.7.8",
     "joi": "^17.11.0",
     "jose": "^5.1.1",
     "mime-types": "^2.1.35",
+    "nodemailer": "^6.9.7",
     "pino": "^8.16.2",
     "pino-pretty": "^10.2.3",
     "react-dropzone": "^14.2.3",
@@ -50,6 +53,7 @@
     "@ls-lint/ls-lint": "^2.2.2",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^20.9.0",
+    "@types/nodemailer": "^6.4.14",
     "@types/react-dropzone": "^5.1.0",
     "@types/swagger-jsdoc": "^6.0.3",
     "@types/uuid": "^9.0.7",

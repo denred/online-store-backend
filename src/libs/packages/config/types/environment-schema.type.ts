@@ -15,6 +15,12 @@ type EnvironmentSchema = {
       SIGNED_URL_EXPIRES_IN_SECONDS: number;
     };
   };
+  MAILER: {
+    SENDGRID_API_KEY: string;
+    SENDGRID_USER: string;
+    SMTP_TLS: boolean;
+    SENDGRID_SENDER_EMAIL: string;
+  };
 };
 
 export { type EnvironmentSchema };
