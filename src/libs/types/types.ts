@@ -1,5 +1,6 @@
 export { type ErrorConstructor } from './error-constructor.type.js';
 export { type PaginatedQuery } from './paginated-query.type.js';
+export { type RequireProperty } from './require-property.type.js';
 export {
   type ServerCommonErrorResponse,
   type ServerErrorResponse,

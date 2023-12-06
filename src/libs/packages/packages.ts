@@ -7,3 +7,4 @@ export { database } from './database/database.js';
 export { encrypt } from './encrypt/encrypt.js';
 export { HttpCode } from './http/http.js';
 export { type ILogger, logger } from './logger/logger.js';
+export { type IView, View } from './view/view.js';
