@@ -11,8 +11,8 @@ class UsersRepository implements IRepository {
     this.db = database;
   }
 
-  public async findById(id: string): Promise<User | null> {
-    return await this.db.user.findUnique({
+  public findById(id: string): Promise<User | null> {
+    return this.db.user.findUnique({
       where: { id },
       include: { addresses: true },
     });

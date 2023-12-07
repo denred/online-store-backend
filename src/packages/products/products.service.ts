@@ -28,13 +28,8 @@ class ProductsService implements IService {
     this.filesService = filesService;
   }
 
-  public async updateProductQuantity(
-    id: string,
-    quantity: number,
-  ): Promise<Product> {
-    await this.getProductOrThrowError(id);
-
-    return await this.productsRepository.update(id, { quantity });
+  public updateProductQuantity(id: string, quantity: number): Promise<Product> {
+    return this.productsRepository.update(id, { quantity });
   }
 
   public async findAll(query: PaginatedQuery): Promise<Product[]> {
@@ -88,15 +83,12 @@ class ProductsService implements IService {
 
     if (!isValidPrismaId) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
         message: HttpMessage.INVALID_ID,
       });
     }
   }
 
   private async getProductOrThrowError(id: string): Promise<Product> {
-    this.isValidPrismaId(id);
-
     const product = await this.findById(id);
 
     if (!product) {

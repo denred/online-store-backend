@@ -79,10 +79,10 @@ class OrdersRepository {
         });
   }
 
-  public async createOrder(payload: CreateOrderPayload): Promise<Order> {
+  public createOrder(payload: CreateOrderPayload): Promise<Order> {
     const { userId, totalPrice, orderItems } = payload;
 
-    return await this.db.$transaction(
+    return this.db.$transaction(
       async (tx) => {
         const order = await tx.order.create({
           data: {
@@ -115,28 +115,27 @@ class OrdersRepository {
     );
   }
 
-  public async getOrderById(
+  public getOrderById(
     orderId: string,
   ): Promise<(Order & { orderItems: OrderItem[] }) | null> {
-    return await this.db.order.findUnique({
+    return this.db.order.findUnique({
       where: { id: orderId },
       include: { orderItems: true },
     });
   }
 
-  public async updateOrder(payload: UpdateOrderPayload): Promise<Order> {
+  public updateOrder(payload: UpdateOrderPayload): Promise<Order> {
     const { orderId, userId, totalPrice, orderItems } = payload;
 
-    const existingOrder = await this.getOrderById(orderId);
-
-    if (!existingOrder) {
-      throwError(OrderErrorMessage.NOT_FOUND, HttpCode.NOT_FOUND);
-    }
-
-    const { orderItems: existingOrderItems } = existingOrder || {};
-
-    return await this.db.$transaction(
+    return this.db.$transaction(
       async (tx) => {
+        const existingOrder = await this.getOrderById(orderId);
+
+        if (!existingOrder) {
+          throwError(OrderErrorMessage.NOT_FOUND, HttpCode.NOT_FOUND);
+        }
+
+        const { orderItems: existingOrderItems } = existingOrder || {};
         const order = await tx.order.update({
           where: { id: orderId },
           data: {
@@ -172,7 +171,7 @@ class OrdersRepository {
   }
 
   public async deleteOrder(orderId: string): Promise<boolean> {
-    const deletedOrder = await this.db.$transaction(async (tx) => {
+    return !!(await this.db.$transaction(async (tx) => {
       const order = await this.getOrderById(orderId);
 
       if (!order) {
@@ -192,13 +191,11 @@ class OrdersRepository {
       return await tx.order.delete({
         where: { id: orderId },
       });
-    });
-
-    return !!deletedOrder;
+    }));
   }
 
-  public async getOrderItemsByOrderId(id: string): Promise<OrderItem[]> {
-    return await this.db.orderItem.findMany({ where: { orderId: id } });
+  public getOrderItemsByOrderId(id: string): Promise<OrderItem[]> {
+    return this.db.orderItem.findMany({ where: { orderId: id } });
   }
 }
 

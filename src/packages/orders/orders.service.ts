@@ -4,7 +4,6 @@ import { HttpError } from '~/libs/exceptions/http-error.exception.js';
 import { type IService } from '~/libs/interfaces/interfaces.js';
 import { HttpCode } from '~/libs/packages/http/http.js';
 
-import { type ProductsService } from '../products/products.js';
 import { type UsersService } from '../users/users.js';
 import { OrderErrorMessage } from './libs/enums/order-error-message.enum.js';
 import {
@@ -22,25 +21,18 @@ class OrdersService implements IService {
 
   private usersService: UsersService;
 
-  private productsService: ProductsService;
-
   public constructor(
     ordersRepository: OrdersRepository,
     usersService: UsersService,
-    productsService: ProductsService,
   ) {
     this.ordersRepository = ordersRepository;
     this.usersService = usersService;
-    this.productsService = productsService;
   }
 
   public async create(payload: CreateOrderDTO): Promise<Order> {
     const { user, orderDelivery, orderItems } = payload;
 
-    const totalPrice = await getOrderTotalPrice(
-      orderItems,
-      this.productsService,
-    );
+    const totalPrice = await getOrderTotalPrice(orderItems);
 
     const createdUser = await this.usersService.create({
       ...user,
@@ -79,8 +71,8 @@ class OrdersService implements IService {
     return order;
   }
 
-  public async findById(id: string): Promise<Order | null> {
-    return await this.ordersRepository.getOrderById(id);
+  public findById(id: string): Promise<Order | null> {
+    return this.ordersRepository.getOrderById(id);
   }
 
   public async update(id: string, payload: UpdateOrderDTO): Promise<Order> {
@@ -103,7 +95,7 @@ class OrdersService implements IService {
 
     const totalPrice =
       orderItems && orderItems.length > 0
-        ? await getOrderTotalPrice(orderItems, this.productsService)
+        ? await getOrderTotalPrice(orderItems)
         : order.totalPrice;
 
     const existingOrderItems =
