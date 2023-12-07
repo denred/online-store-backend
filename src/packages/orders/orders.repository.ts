@@ -143,9 +143,9 @@ class OrdersRepository {
             userId,
             totalPrice,
             orderItems: {
-              updateMany: orderItems.map((item) => ({
-                where: { productId: item.productId },
-                data: { productId: item.productId, quantity: item.quantity },
+              updateMany: orderItems.map(({ productId, quantity }) => ({
+                where: { productId },
+                data: { productId, quantity },
               })),
             },
           },
