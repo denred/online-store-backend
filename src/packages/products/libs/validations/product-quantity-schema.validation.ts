@@ -1,6 +1,9 @@
 import Joi from 'joi';
 
-import { ErrorMessage, ProductValidationRules } from '../enums/enums.js';
+import {
+  ProductsErrorMessage,
+  ProductValidationRules,
+} from '../enums/enums.js';
 
 const quantitySchema = Joi.number()
   .positive()
@@ -8,10 +11,10 @@ const quantitySchema = Joi.number()
   .max(ProductValidationRules.MAX_QUANTITY)
   .required()
   .messages({
-    'number.base': ErrorMessage.QUANTITY_INVALID,
-    'number.min': ErrorMessage.QUANTITY_INVALID,
-    'number.max': ErrorMessage.QUANTITY_INVALID,
-    'any.required': ErrorMessage.REQUIRED,
+    'number.base': ProductsErrorMessage.QUANTITY_INVALID,
+    'number.min': ProductsErrorMessage.QUANTITY_INVALID,
+    'number.max': ProductsErrorMessage.QUANTITY_INVALID,
+    'any.required': ProductsErrorMessage.REQUIRED,
   });
 
 const productQuantitySchema = Joi.object({ quantity: quantitySchema });

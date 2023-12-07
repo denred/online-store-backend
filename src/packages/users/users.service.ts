@@ -1,6 +1,6 @@
 import { type User, UserRole, UserStatus } from '@prisma/client';
 
-import { HttpError } from '~/libs/exceptions/http-error.exception.js';
+import { throwError } from '~/libs/exceptions/exceptions.js';
 import { type IEncrypt, type IService } from '~/libs/interfaces/interfaces.js';
 import { HttpCode } from '~/libs/packages/http/http.js';
 
@@ -44,11 +44,8 @@ class UsersService implements IService {
 
     const user = await this.findUserByEmailOrPhone({ email, phone });
 
-    if (user && user.status !== UserStatus.NOT_REGISTERED) {
-      throw new HttpError({
-        status: HttpCode.FORBIDDEN,
-        message: UsersErrorMessage.ALREADY_EXISTS,
-      });
+    if (user && user.status !== UserStatus.ANONYMOUS) {
+      throwError(UsersErrorMessage.ALREADY_EXISTS, HttpCode.FORBIDDEN);
     }
 
     return await this.usersRepository.create(payload);
@@ -61,14 +58,13 @@ class UsersService implements IService {
     const { hash: passHash, salt: passSalt } =
       await this.encryptService.generate(password);
 
-    const { hash, salt, ...createdUser } =
-      await this.usersRepository.registerNewUser({
-        ...user,
-        hash: passHash,
-        salt: passSalt,
-        status: UserStatus.ACTIVE,
-        role: UserRole.USER,
-      });
+    const { hash, salt, ...createdUser } = await this.usersRepository.create({
+      ...user,
+      hash: passHash,
+      salt: passSalt,
+      status: UserStatus.ACTIVE,
+      role: UserRole.USER,
+    });
 
     return createdUser;
   }
@@ -82,10 +78,7 @@ class UsersService implements IService {
     const existingUser = await this.findById(id);
 
     if (!existingUser) {
-      throw new HttpError({
-        status: HttpCode.NOT_FOUND,
-        message: UsersErrorMessage.NOT_FOUND,
-      });
+      throwError(UsersErrorMessage.NOT_FOUND, HttpCode.NOT_FOUND);
     }
 
     const userWithSameEmailOrPhone = await this.findUserByEmailOrPhone({
@@ -94,15 +87,12 @@ class UsersService implements IService {
     });
 
     if (userWithSameEmailOrPhone && userWithSameEmailOrPhone.id !== id) {
-      throw new HttpError({
-        status: HttpCode.FORBIDDEN,
-        message: UsersErrorMessage.ALREADY_EXISTS,
-      });
+      throwError(UsersErrorMessage.ALREADY_EXISTS, HttpCode.FORBIDDEN);
     }
 
     return await this.usersRepository.update(id, {
       ...payload,
-      addresses: addresses,
+      addresses,
     });
   }
 

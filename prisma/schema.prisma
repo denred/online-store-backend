@@ -47,7 +47,7 @@ enum Colour {
 }
 
 enum UserStatus {
-  NOT_REGISTERED
+  ANONYMOUS
   ACTIVE
   BLOCKED
 }
@@ -67,7 +67,7 @@ model User {
   salt      String?
   addresses Address[]
   orders    Order[]
-  status    UserStatus @default(NOT_REGISTERED)
+  status    UserStatus @default(ANONYMOUS)
   role      UserRole   @default(USER)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now()) @updatedAt

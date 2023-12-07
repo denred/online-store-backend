@@ -1,21 +1,15 @@
 import Joi from 'joi';
 
-import { userCreateCommonValidationSchema } from '~/packages/users/users.js';
+import { commonUserSchema } from '~/packages/users/users.js';
 
-import { AuthErrorMessage, AuthValidationRules } from '../enums/enums.js';
-
-const passwordSchema = Joi.string()
-  .trim()
-  .required()
-  .pattern(new RegExp(AuthValidationRules.PASSWORD_PATTERN))
-  .messages({
-    'string.empty': AuthErrorMessage.FIELD_REQUIRED,
-    'string.pattern.base': AuthErrorMessage.PASSWORD_INVALID,
-  });
+const { firstName, lastName, phone, email, password } = commonUserSchema;
 
 const userSignUpSchema = Joi.object({
-  ...userCreateCommonValidationSchema,
-  password: passwordSchema,
+  firstName: firstName.required(),
+  lastName: lastName.required(),
+  phone: phone.required(),
+  email: email.required(),
+  password: password.required(),
 });
 
 export { userSignUpSchema };

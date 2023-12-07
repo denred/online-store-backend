@@ -1,11 +1,9 @@
 const OrdersValidationRules = {
-  NAME_MIN_LENGTH: 2,
-  NAME_MAX_LENGTH: 50,
-  ZIP_CODE_MIN_LENGTH: 5,
-  ZIP_CODE_MAX_LENGTH: 10,
+  ZIP_CODE_LENGTH: 5,
   MORE_INFO_MAX_LENGTH: 255,
-  QUANTITY_MIN: 1,
+  MIN_QUANTITY: 1,
   PHONE_PATTERN: /^\+\(?(\d{3})\)?([ .-]?)(\d{3})\2(\d{4})/,
+  ZIP_CODE_PATTERN: /\d{5}/,
 } as const;
 
 export { OrdersValidationRules };

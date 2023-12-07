@@ -6,6 +6,7 @@ const OrderErrorMessage = {
   FIELD_MIN_LENGTH: '{{#label}} must be at least {{#limit}} characters long',
   FIELD_MAX_LENGTH: '{{#label}} must be at most {{#limit}} characters long',
   FIELD_MIN_VALUE: '{{#label}} must be at least {{#limit}}',
+  ZIP_CODE_NOT_NUMERIC: 'Zip code must contain 5 digits',
   FIELD_INTEGER: '{{#label}} must be an integer',
   FIELD_ARRAY: '{{#label}} must be an array',
   EMPTY_ARRAY: '{{#label}} must be not empty',

@@ -1,1 +1,1 @@
-export { userCreateCommonValidationSchema } from './user-create-common-schema.validation.js';
+export { commonUserSchema } from './common-user-schema.validation.js';

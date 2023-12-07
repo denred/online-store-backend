@@ -6,7 +6,8 @@ import {
 } from '@prisma/client';
 import { type DefaultArgs } from '@prisma/client/runtime/library.js';
 
-import { HttpError } from '~/libs/exceptions/http-error.exception.js';
+import { TransactionConfigParameters } from '~/libs/enums/enums.js';
+import { throwError } from '~/libs/exceptions/exceptions.js';
 import { HttpCode } from '~/libs/packages/http/http.js';
 
 import { OrderErrorMessage } from './libs/enums/enums.js';
@@ -58,10 +59,10 @@ class OrdersRepository {
       !existingProduct ||
       existingProduct.quantity < Math.max(quantity - existingOrderQuantity, 0)
     ) {
-      throw new HttpError({
-        status: HttpCode.FORBIDDEN,
-        message: `Insufficient quantity for product ${productId}`,
-      });
+      throwError(
+        `Insufficient quantity for product ${productId}`,
+        HttpCode.FORBIDDEN,
+      );
     }
 
     const difference = Math.abs(quantity - existingOrderQuantity);
@@ -108,8 +109,8 @@ class OrdersRepository {
         return order;
       },
       {
-        maxWait: 5000,
-        timeout: 10_000,
+        maxWait: TransactionConfigParameters.MAX_WAIT,
+        timeout: TransactionConfigParameters.TIMEOUT,
       },
     );
   }
@@ -129,13 +130,10 @@ class OrdersRepository {
     const existingOrder = await this.getOrderById(orderId);
 
     if (!existingOrder) {
-      throw new HttpError({
-        status: HttpCode.NOT_FOUND,
-        message: OrderErrorMessage.NOT_FOUND,
-      });
+      throwError(OrderErrorMessage.NOT_FOUND, HttpCode.NOT_FOUND);
     }
 
-    const { orderItems: existingOrderItems } = existingOrder;
+    const { orderItems: existingOrderItems } = existingOrder || {};
 
     return await this.db.$transaction(
       async (tx) => {
@@ -167,8 +165,8 @@ class OrdersRepository {
         return order;
       },
       {
-        maxWait: 5000,
-        timeout: 10_000,
+        maxWait: TransactionConfigParameters.MAX_WAIT,
+        timeout: TransactionConfigParameters.TIMEOUT,
       },
     );
   }
@@ -178,15 +176,10 @@ class OrdersRepository {
       const order = await this.getOrderById(orderId);
 
       if (!order) {
-        throw new HttpError({
-          status: HttpCode.NOT_FOUND,
-          message: OrderErrorMessage.NOT_FOUND,
-        });
+        throwError(OrderErrorMessage.NOT_FOUND, HttpCode.NOT_FOUND);
       }
 
-      const { orderItems } = order;
-
-      for (const orderItem of orderItems) {
+      for (const orderItem of order?.orderItems ?? []) {
         await this.updateProductQuantity({ tx, orderItem, deletionFlag: true });
       }
 

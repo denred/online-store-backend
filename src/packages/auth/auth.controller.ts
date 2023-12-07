@@ -19,37 +19,36 @@ import { userSignUpSchema } from './libs/validations/validations.js';
  * @swagger
  * components:
  *    schemas:
- *      UserSignUpRequestDTO:
+ *      CreateUserRequest:
  *        type: object
  *        properties:
  *          phone:
  *            type: string
- *            example: '+380505555555'
+ *            pattern: ^\+(?:\d{1,4}\s?)?\d{7,11}$
+ *            description: Must be in international format, starting with +
  *          email:
  *            type: string
  *            format: email
- *            minLength: 6
- *            maxLength: 254
+ *            maxLength: 80
+ *            description: Email must be a valid email address
  *          firstName:
  *            type: string
  *            minLength: 2
  *            maxLength: 50
- *            pattern: ^['A-Za-z-]{2,50}$
  *            example: Bob
  *          lastName:
  *            type: string
  *            minLength: 2
  *            maxLength: 50
- *            pattern: ^['A-Za-z-]{2,50}$
  *            example: Sponge
  *          password:
  *            type: string
  *            minimum: 6
  *            maximum: 20
- *            pattern: ^(?=.*[A-Za-z])(?=.*\d)[\dA-Za-z]{6,20}$
+ *            pattern: ^(?=.*[a-z])(?=.*\\d)[\\dA-Za-z]{6,20}$
  *            description: Must be 6+ characters, at least 1 letter and 1 number
  *
- *      UserSignUpResponseDTO:
+ *      CreateUserResponse:
  *         type: object
  *         properties:
  *           firstName:
@@ -111,7 +110,7 @@ class AuthController extends Controller {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: '#/components/schemas/UserSignUpRequestDTO'
+   *             $ref: '#/components/schemas/CreateUserRequest'
    *       description: User auth data
    *       required: true
    *     responses:
@@ -120,7 +119,7 @@ class AuthController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/UserSignUpResponseDTO'
+   *               $ref: '#/components/schemas/CreateUserResponse'
    *       409:
    *         description: User already exists
    *         content:

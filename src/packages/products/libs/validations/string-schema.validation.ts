@@ -1,11 +1,9 @@
-import joi from 'joi';
+import Joi from 'joi';
 
-import { getStringValidationSchema } from '~/libs/helpers/helpers.js';
+import { objectIdSchema } from '~/libs/validations/validations.js';
 
-import { ErrorMessage } from '../enums/enums.js';
-
-const productParametersSchema = joi.object<{ id: string }, true>({
-  id: getStringValidationSchema(ErrorMessage.ID_INVALID),
+const productParametersSchema = Joi.object<{ id: string }, true>({
+  id: objectIdSchema,
 });
 
 export { productParametersSchema };
