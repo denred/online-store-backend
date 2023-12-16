@@ -8,3 +8,4 @@ const jwt = new JwtService({
 });
 
 export { jwt };
+export { type IJwtService } from './libs/interfaces/interfaces.js';

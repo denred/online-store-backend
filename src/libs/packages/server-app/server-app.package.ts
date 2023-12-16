@@ -20,15 +20,17 @@ import {
   type ServerCommonErrorResponse,
   type ServerValidationErrorResponse,
 } from '~/libs/types/types.js';
+import { authPlugin } from '~/packages/auth/auth.js';
 import { filesValidationPlugin } from '~/packages/files/files-validation.plugin.js';
 import { type FileInputConfig } from '~/packages/files/libs/types/types.js';
+import { type UsersService } from '~/packages/users/users.js';
 
 import { type IConfig } from '../config/config.js';
 import { type EnvironmentSchema } from '../config/types/types.js';
 import { type ValidateFilesStrategyOptions } from '../controller/types/validate-files-strategy-options.type.js';
 import { HttpCode } from '../http/enums/enums.js';
 import { type ILogger } from '../logger/logger.js';
-import { FileSizeBytes } from './enums/enums.js';
+import { type IJwtService } from '../packages.js';
 import {
   type IServerApp,
   type IServerAppApi,
@@ -40,6 +42,8 @@ type Constructor = {
   logger: ILogger;
   database: PrismaClient;
   apis: IServerAppApi[];
+  usersService: UsersService;
+  jwtService: IJwtService;
 };
 
 type StrategyFunction = (config?: FileInputConfig) => preHandlerHookHandler;
@@ -55,11 +59,24 @@ class ServerApp implements IServerApp {
 
   private app: ReturnType<typeof Fastify>;
 
-  public constructor({ config, logger, database, apis }: Constructor) {
+  private usersService: UsersService;
+
+  private jwtService: IJwtService;
+
+  public constructor({
+    config,
+    logger,
+    database,
+    apis,
+    usersService,
+    jwtService,
+  }: Constructor) {
     this.config = config;
     this.logger = logger;
     this.database = database;
     this.apis = apis;
+    this.usersService = usersService;
+    this.jwtService = jwtService;
 
     this.app = Fastify();
   }
@@ -213,13 +230,16 @@ class ServerApp implements IServerApp {
 
   private async initPlugins(): Promise<void> {
     await this.app.register(fastifyAuth);
+    await this.app.register(authPlugin, {
+      config: this.config,
+      usersService: this.usersService,
+      jwtService: this.jwtService,
+    });
+
     await this.app.register(filesValidationPlugin);
 
     await this.app.register(fastifyMultipart, {
       attachFieldsToBody: true,
-      limits: {
-        fileSize: FileSizeBytes.TEN_MEGABYTES,
-      },
     });
   }
 

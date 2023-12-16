@@ -11,3 +11,4 @@ const authService = new AuthService(usersService);
 const authController = new AuthController(logger, authService);
 
 export { authController };
+export { authPlugin } from './auth.plugin.js';

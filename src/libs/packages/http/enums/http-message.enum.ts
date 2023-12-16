@@ -4,6 +4,8 @@ const HttpMessage = {
   INVALID_ID: 'Products id is not valid!',
   USER_EMAIL_EXISTS: 'A user with this email already exists.',
   USER_PHONE_EXISTS: 'A user with this phone number already exists.',
+  UNAUTHORIZED: 'You are not authorized.',
+  INVALID_JWT: 'Invalid JWT payload.',
 } as const;
 
 export { HttpMessage };
