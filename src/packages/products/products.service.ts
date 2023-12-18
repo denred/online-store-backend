@@ -28,6 +28,10 @@ class ProductsService implements IService {
     this.filesService = filesService;
   }
 
+  public updateProductQuantity(id: string, quantity: number): Promise<Product> {
+    return this.productsRepository.update(id, { quantity });
+  }
+
   public async findAll(query: PaginatedQuery): Promise<Product[]> {
     return await this.productsRepository.findAll(query);
   }
@@ -49,13 +53,13 @@ class ProductsService implements IService {
   }
 
   public async update(id: string, payload: Partial<Product>): Promise<Product> {
-    await this.isProductExist(id);
+    await this.getProductOrThrowError(id);
 
     return await this.productsRepository.update(id, payload);
   }
 
   public async delete(id: string): Promise<boolean> {
-    await this.isProductExist(id);
+    await this.getProductOrThrowError(id);
 
     return await this.productsRepository.delete(id);
   }
@@ -79,25 +83,22 @@ class ProductsService implements IService {
 
     if (!isValidPrismaId) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
         message: HttpMessage.INVALID_ID,
       });
     }
   }
 
-  private async isProductExist(id: string): Promise<boolean> {
-    this.isValidPrismaId(id);
-
+  private async getProductOrThrowError(id: string): Promise<Product> {
     const product = await this.findById(id);
 
     if (!product) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
+        status: HttpCode.NOT_FOUND,
         message: HttpMessage.PRODUCT_DOES_NOT_EXIST,
       });
     }
 
-    return true;
+    return product;
   }
 
   public async getTopCategories(): Promise<TopCategory[]> {

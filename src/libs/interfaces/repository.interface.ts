@@ -1,5 +1,5 @@
 interface IRepository<T = unknown> {
-  findById(id: string): Promise<T[]>;
+  findById(id: string): Promise<T[] | T>;
   create(payload: unknown): Promise<T>;
   update(id: unknown, payload: unknown): Promise<T>;
   delete(id: unknown): Promise<boolean>;

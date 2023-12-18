@@ -5,3 +5,4 @@ const config = new Config(logger);
 
 export { config };
 export { type IConfig } from './interfaces/interfaces.js';
+export { type EnvironmentSchema } from './types/types.js';

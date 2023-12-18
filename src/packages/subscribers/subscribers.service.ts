@@ -22,7 +22,6 @@ class SubscribersService {
 
     if (subscription) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
         message: SubscriptionErrorMessage.SUBSCRIPTION_EXIST,
       });
     }

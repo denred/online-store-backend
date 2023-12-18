@@ -21,6 +21,11 @@ type EnvironmentSchema = {
     SMTP_TLS: boolean;
     SENDGRID_SENDER_EMAIL: string;
   };
+  JWT: {
+    SECRET: string;
+    ISSUER: string;
+    EXP_TIME: string;
+  };
 };
 
 export { type EnvironmentSchema };

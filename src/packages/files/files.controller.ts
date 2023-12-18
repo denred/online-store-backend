@@ -9,6 +9,7 @@ import {
 import { HttpCode } from '~/libs/packages/http/http.js';
 import { type ILogger } from '~/libs/packages/logger/logger.js';
 
+import { AuthStrategy } from '../auth/auth.js';
 import { type FilesService } from './files.service.js';
 import { fileInputDefaultsConfig } from './libs/config/file-inputs-default.config.js';
 import { FilesApiPath, FilesValidationStrategy } from './libs/enums/enums.js';
@@ -83,12 +84,16 @@ class FilesController extends Controller {
 
   public constructor(logger: ILogger, filesService: FilesService) {
     super(logger, ApiPath.FILES);
-
     this.filesService = filesService;
+    const defaultStrategy = [
+      AuthStrategy.VERIFY_JWT,
+      AuthStrategy.VERIFY_ADMIN,
+    ];
 
     this.addRoute({
       path: FilesApiPath.ROOT,
       method: 'POST',
+      authStrategy: defaultStrategy,
       validateFilesStrategy: {
         strategy: FilesValidationStrategy.BASIC,
         filesInputConfig: {
@@ -109,6 +114,7 @@ class FilesController extends Controller {
     this.addRoute({
       path: FilesApiPath.$ID,
       method: 'PUT',
+      authStrategy: defaultStrategy,
       validation: {
         body: filesUpdateKeyRequestBody,
         params: filesKeyRequestParameters,
@@ -125,6 +131,7 @@ class FilesController extends Controller {
     this.addRoute({
       path: FilesApiPath.$ID,
       method: 'DELETE',
+      authStrategy: defaultStrategy,
       validation: {
         params: filesKeyRequestParameters,
       },
@@ -139,6 +146,7 @@ class FilesController extends Controller {
     this.addRoute({
       path: `${FilesApiPath.URL_ROOT}${FilesApiPath.$ID}`,
       method: 'GET',
+      authStrategy: defaultStrategy,
       validation: {
         params: filesKeyRequestParameters,
       },
@@ -153,6 +161,7 @@ class FilesController extends Controller {
     this.addRoute({
       path: FilesApiPath.$ID,
       method: 'GET',
+      authStrategy: defaultStrategy,
       validation: {
         params: filesKeyRequestParameters,
       },

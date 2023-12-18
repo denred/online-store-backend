@@ -58,11 +58,12 @@ class Controller implements IController {
   private mapRequest(
     request: Parameters<RouteParameters['handler']>[0],
   ): ApiHandlerOptions {
-    const { body, query, params, hostname, protocol } = request;
+    const { body, query, params, hostname, protocol, user } = request;
 
     return {
       body,
       query,
+      user,
       params,
       parsedFiles: (body as { files: MultipartParsedFile[] })?.files,
       hostname: buildUrl(protocol, hostname),

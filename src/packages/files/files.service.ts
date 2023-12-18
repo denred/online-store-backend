@@ -44,7 +44,6 @@ class FilesService implements IService {
 
     if (!fileRecord) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
         message: HttpMessage.FILE_DOES_NOT_EXIST,
       });
     }
@@ -157,7 +156,6 @@ class FilesService implements IService {
 
     if (!file) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
         message: HttpMessage.FILE_DOES_NOT_EXIST,
       });
     }
@@ -218,7 +216,6 @@ class FilesService implements IService {
 
     if (!fileRecord) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
         message: HttpMessage.FILE_DOES_NOT_EXIST,
       });
     }
@@ -227,7 +224,6 @@ class FilesService implements IService {
 
     if (!fileContent) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
         message: HttpMessage.FILE_DOES_NOT_EXIST,
       });
     }

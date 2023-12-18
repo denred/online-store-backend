@@ -1,4 +1,4 @@
-import fastifyAuth from '@fastify/auth';
+import fastifyAuth, { type FastifyAuthFunction } from '@fastify/auth';
 import cors from '@fastify/cors';
 import fastifyMultipart from '@fastify/multipart';
 import swagger, { type StaticDocumentSpec } from '@fastify/swagger';
@@ -20,14 +20,18 @@ import {
   type ServerCommonErrorResponse,
   type ServerValidationErrorResponse,
 } from '~/libs/types/types.js';
+import { authPlugin } from '~/packages/auth/auth.js';
 import { filesValidationPlugin } from '~/packages/files/files-validation.plugin.js';
 import { type FileInputConfig } from '~/packages/files/libs/types/types.js';
+import { type UsersService } from '~/packages/users/users.js';
 
 import { type IConfig } from '../config/config.js';
 import { type EnvironmentSchema } from '../config/types/types.js';
+import { type AuthStrategyHandler } from '../controller/controller.js';
 import { type ValidateFilesStrategyOptions } from '../controller/types/validate-files-strategy-options.type.js';
 import { HttpCode } from '../http/enums/enums.js';
 import { type ILogger } from '../logger/logger.js';
+import { type IJwtService } from '../packages.js';
 import { FileSizeBytes } from './enums/enums.js';
 import {
   type IServerApp,
@@ -40,6 +44,8 @@ type Constructor = {
   logger: ILogger;
   database: PrismaClient;
   apis: IServerAppApi[];
+  usersService: UsersService;
+  jwtService: IJwtService;
 };
 
 type StrategyFunction = (config?: FileInputConfig) => preHandlerHookHandler;
@@ -55,22 +61,48 @@ class ServerApp implements IServerApp {
 
   private app: ReturnType<typeof Fastify>;
 
-  public constructor({ config, logger, database, apis }: Constructor) {
+  private usersService: UsersService;
+
+  private jwtService: IJwtService;
+
+  public constructor({
+    config,
+    logger,
+    database,
+    apis,
+    usersService,
+    jwtService,
+  }: Constructor) {
     this.config = config;
     this.logger = logger;
     this.database = database;
     this.apis = apis;
-
+    this.usersService = usersService;
+    this.jwtService = jwtService;
     this.app = Fastify();
   }
 
   public addRoute(parameters: RouteParameters): void {
-    const { path, method, handler, validation, validateFilesStrategy } =
-      parameters;
+    const {
+      path,
+      method,
+      handler,
+      validation,
+      validateFilesStrategy,
+      authStrategy,
+    } = parameters;
 
     const onRequest: onRequestHookHandler[] = [];
     const preHandler: preHandlerHookHandler[] = [];
     const preValidation: preValidationHookHandler[] = [];
+
+    if (authStrategy) {
+      const authStrategyHandler = this.resolveAuthStrategy(authStrategy);
+
+      if (authStrategyHandler) {
+        onRequest.push(authStrategyHandler);
+      }
+    }
 
     if (validateFilesStrategy) {
       preValidation.push(
@@ -117,6 +149,32 @@ class ServerApp implements IServerApp {
     const strategyFunction = this.app[strategy] as StrategyFunction;
 
     return strategyFunction(filesInputConfig);
+  }
+
+  private resolveAuthStrategy(
+    authStrategy?: AuthStrategyHandler,
+  ): undefined | preHandlerHookHandler {
+    if (!authStrategy) {
+      return undefined;
+    }
+
+    if (Array.isArray(authStrategy) && authStrategy.length > 0) {
+      const strategies = authStrategy.map(
+        (strategy) => this.app[strategy as keyof typeof this.app],
+      );
+
+      return this.app.auth(strategies as FastifyAuthFunction[], {
+        relation: 'and',
+      });
+    }
+
+    if (typeof authStrategy === 'string' && authStrategy in this.app) {
+      return this.app.auth([
+        this.app[authStrategy as keyof typeof this.app],
+      ] as FastifyAuthFunction[]);
+    }
+
+    return undefined;
   }
 
   public addRoutes(parameters: RouteParameters[]): void {
@@ -213,6 +271,12 @@ class ServerApp implements IServerApp {
 
   private async initPlugins(): Promise<void> {
     await this.app.register(fastifyAuth);
+    await this.app.register(authPlugin, {
+      config: this.config,
+      usersService: this.usersService,
+      jwtService: this.jwtService,
+    });
+
     await this.app.register(filesValidationPlugin);
 
     await this.app.register(fastifyMultipart, {

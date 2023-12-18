@@ -37,3 +37,7 @@ This is the repository responsible for Online-store apps backend.
 - [prettier](https://prettier.io/) — an opinionated code formatter.
 - [ls-lint](https://ls-lint.org/) — file and directory name linter.
 - [eslint](https://eslint.org/) — find problems in your JS code.
+
+## 💽 Database schema
+
+![db_schema](./ERD.svg)

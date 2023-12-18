@@ -7,6 +7,7 @@ import {
 import { HttpCode } from '~/libs/packages/http/http.js';
 import { type ILogger } from '~/libs/packages/logger/logger.js';
 
+import { AuthStrategy } from '../auth/auth.js';
 import { SubscribersApiPath } from './libs/enums/enums.js';
 import { type SubscriptionBody } from './libs/types/types.js';
 import { subscriptionBodyValidation } from './libs/validations/validations.js';
@@ -144,6 +145,7 @@ class SubscribersController extends Controller {
     this.addRoute({
       path: SubscribersApiPath.UNSUBSCRIBE,
       method: 'POST',
+      authStrategy: AuthStrategy.VERIFY_JWT,
       validation: {
         body: subscriptionBodyValidation,
       },
@@ -156,6 +158,7 @@ class SubscribersController extends Controller {
     this.addRoute({
       path: SubscribersApiPath.SUBSCRIPTION_STATUS,
       method: 'POST',
+      authStrategy: AuthStrategy.VERIFY_JWT,
       validation: {
         body: subscriptionBodyValidation,
       },
@@ -168,6 +171,7 @@ class SubscribersController extends Controller {
     this.addRoute({
       path: SubscribersApiPath.SUBSCRIPTION_PREFERENCES,
       method: 'PUT',
+      authStrategy: AuthStrategy.VERIFY_JWT,
       validation: {
         body: subscriptionBodyValidation,
       },
@@ -229,6 +233,8 @@ class SubscribersController extends Controller {
    * @swagger
    * /emails/unsubscribe:
    *   post:
+   *     security:
+   *       - bearerAuth: []
    *     tags:
    *       - Subscribers API
    *     summary: Unsubscribe a user
@@ -272,6 +278,8 @@ class SubscribersController extends Controller {
    * @swagger
    * /emails/subscription/status:
    *   post:
+   *     security:
+   *       - bearerAuth: []
    *     tags:
    *       - Subscribers API
    *     summary: Get subscription status
@@ -316,6 +324,8 @@ class SubscribersController extends Controller {
    * @swagger
    * /emails/subscription/preferences:
    *   put:
+   *     security:
+   *       - bearerAuth: []
    *     tags:
    *       - Subscribers API
    *     summary: Set subscription preferences
