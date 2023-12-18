@@ -11,7 +11,6 @@ type AuthStrategyHandler =
       fastify: FastifyInstance,
     ) =>
       | FastifyAuthFunction[]
-      | (FastifyAuthFunction | FastifyAuthFunction[])[])
-  | null;
+      | (FastifyAuthFunction | FastifyAuthFunction[])[]);
 
 export { type AuthStrategyHandler };

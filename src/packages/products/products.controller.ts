@@ -11,6 +11,7 @@ import { type ILogger } from '~/libs/packages/logger/interfaces/interfaces.js';
 import { type PaginatedQuery } from '~/libs/types/types.js';
 import { commonGetPageQuery } from '~/libs/validations/validations.js';
 
+import { AuthStrategy } from '../auth/auth.js';
 import { ProductsApiPath } from './libs/enums/enums.js';
 import { type CreateProductDto } from './libs/types/create-product-dto.type.js';
 import { type ImageUrl } from './libs/types/types.js';
@@ -235,6 +236,11 @@ import { type ProductsService } from './products.service.js';
  *           type: string
  *         url:
  *           type: string
+ * securitySchemes:
+ *   bearerAuth:
+ *     type: http
+ *     scheme: bearer
+ *     bearerFormat: JWT
  *
  */
 class ProductsController extends Controller {
@@ -242,12 +248,16 @@ class ProductsController extends Controller {
 
   public constructor(logger: ILogger, productsService: ProductsService) {
     super(logger, ApiPath.PRODUCTS);
-
     this.productsService = productsService;
+    const defaultStrategy = [
+      AuthStrategy.VERIFY_JWT,
+      AuthStrategy.VERIFY_ADMIN,
+    ];
 
     this.addRoute({
       path: ProductsApiPath.ROOT,
       method: 'POST',
+      authStrategy: defaultStrategy,
       validation: {
         body: createProductSchema,
       },
@@ -282,6 +292,7 @@ class ProductsController extends Controller {
     this.addRoute({
       path: ProductsApiPath.$ID,
       method: 'PUT',
+      authStrategy: defaultStrategy,
       validation: {
         params: productParametersSchema,
         body: updateProductSchema,
@@ -298,6 +309,7 @@ class ProductsController extends Controller {
     this.addRoute({
       path: ProductsApiPath.$ID,
       method: 'DELETE',
+      authStrategy: defaultStrategy,
       validation: {
         params: productParametersSchema,
         query: commonGetPageQuery,
@@ -349,6 +361,7 @@ class ProductsController extends Controller {
     this.addRoute({
       path: ProductsApiPath.UPDATE_QUANTITY,
       method: 'PUT',
+      authStrategy: defaultStrategy,
       validation: {
         params: productParametersSchema,
         body: productQuantitySchema,
@@ -367,6 +380,8 @@ class ProductsController extends Controller {
    * @swagger
    * /products/:
    *   post:
+   *     security:
+   *       - bearerAuth: []
    *     tags:
    *       - Products API
    *     summary: Create product
@@ -499,6 +514,8 @@ class ProductsController extends Controller {
    * @swagger
    * /products/{id}:
    *   put:
+   *     security:
+   *       - bearerAuth: []
    *     tags:
    *       - Products API
    *     summary: Update product by ID
@@ -563,6 +580,8 @@ class ProductsController extends Controller {
    * @swagger
    * /products/{id}:
    *   delete:
+   *     security:
+   *       - bearerAuth: []
    *     tags:
    *       - Products API
    *     summary: Delete product by ID
@@ -761,6 +780,8 @@ class ProductsController extends Controller {
    * @swagger
    * /products/update-quantity/{id}:
    *   put:
+   *     security:
+   *       - bearerAuth: []
    *     tags:
    *       - Products API
    *     summary: Update product quantity by ID

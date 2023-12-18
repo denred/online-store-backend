@@ -7,6 +7,7 @@ import {
 import { HttpCode } from '~/libs/packages/http/http.js';
 import { type ILogger } from '~/libs/packages/logger/logger.js';
 
+import { AuthStrategy } from '../auth/auth.js';
 import { OrdersApiPath } from './libs/enums/enums.js';
 import {
   type CreateOrderDTO,
@@ -118,6 +119,12 @@ import { type OrdersService } from './orders.service.js';
  *               enum:
  *                 - Order with such id does not exist!
  *
+ * securitySchemes:
+ *   bearerAuth:
+ *     type: http
+ *     scheme: bearer
+ *     bearerFormat: JWT
+ *
  */
 class OrdersController extends Controller {
   private ordersService: OrdersService;
@@ -142,6 +149,7 @@ class OrdersController extends Controller {
     this.addRoute({
       path: OrdersApiPath.$ID,
       method: 'GET',
+      authStrategy: AuthStrategy.VERIFY_JWT,
       validation: { params: ordersParametersSchema },
       handler: (options) =>
         this.findById(
@@ -154,6 +162,7 @@ class OrdersController extends Controller {
     this.addRoute({
       path: OrdersApiPath.$ID,
       method: 'DELETE',
+      authStrategy: [AuthStrategy.VERIFY_JWT, AuthStrategy.VERIFY_ADMIN],
       validation: { params: ordersParametersSchema },
       handler: (options) =>
         this.delete(
@@ -166,6 +175,7 @@ class OrdersController extends Controller {
     this.addRoute({
       path: OrdersApiPath.$ID,
       method: 'PUT',
+      authStrategy: AuthStrategy.VERIFY_JWT,
       validation: {
         params: ordersParametersSchema,
         body: updateOrderSchema,
@@ -217,6 +227,8 @@ class OrdersController extends Controller {
    * @swagger
    * /orders/{id}:
    *   get:
+   *     security:
+   *       - bearerAuth: []
    *     tags:
    *       - Orders API
    *     summary: Find order by ID
@@ -259,6 +271,8 @@ class OrdersController extends Controller {
    * @swagger
    * /orders/{id}:
    *   put:
+   *     security:
+   *       - bearerAuth: []
    *     tags:
    *       - Orders API
    *     summary: Update an existing order.
@@ -301,6 +315,8 @@ class OrdersController extends Controller {
    * @swagger
    * /orders/{id}:
    *   delete:
+   *     security:
+   *       - bearerAuth: []
    *     tags:
    *       - Orders API
    *     summary: Delete order by ID

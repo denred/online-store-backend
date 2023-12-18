@@ -5,8 +5,8 @@ import { type IEncrypt, type IService } from '~/libs/interfaces/interfaces.js';
 import { HttpCode } from '~/libs/packages/http/http.js';
 
 import {
+  type UserSignResponseDTO,
   type UserSignUpRequestDTO,
-  type UserSignUpResponseDTO,
 } from '../auth/libs/types/types.js';
 import { UsersErrorMessage } from './libs/enums/enums.js';
 import { type CreateUserDTO, type UpdateUserDTO } from './libs/types/types.js';
@@ -53,7 +53,7 @@ class UsersService implements IService {
 
   public async registerNewUser(
     payload: UserSignUpRequestDTO,
-  ): Promise<UserSignUpResponseDTO> {
+  ): Promise<UserSignResponseDTO> {
     const { password, ...user } = payload;
     const { hash: passHash, salt: passSalt } =
       await this.encryptService.generate(password);
@@ -67,6 +67,13 @@ class UsersService implements IService {
     });
 
     return createdUser;
+  }
+
+  public async comparePasswords(
+    inputPassword: string,
+    passwordHash: string,
+  ): Promise<boolean> {
+    return await this.encryptService.compare(inputPassword, passwordHash);
   }
 
   public async update(

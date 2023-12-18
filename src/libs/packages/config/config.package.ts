@@ -143,7 +143,7 @@ class Config implements IConfig<EnvironmentSchema> {
         EXP_TIME: {
           doc: 'Jwt key expiration time',
           format: String,
-          env: 'JWT_LIFETIME',
+          env: 'JWT_EXP_TIME',
           default: '24h',
         },
       },

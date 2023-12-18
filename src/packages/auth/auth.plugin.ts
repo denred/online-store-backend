@@ -1,4 +1,4 @@
-import { type User } from '@prisma/client';
+import { type User, UserRole } from '@prisma/client';
 import { type FastifyReply, type FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import { type ValidationError } from 'joi';
@@ -73,9 +73,21 @@ const authPlugin = fp<AuthPluginOptions>((fastify, options, done) => {
       }
     };
 
-  fastify.decorate(AuthStrategy.INJECT_USER, verifyJwtStrategy(false));
+  const verifyStatus =
+    (role: UserRole) =>
+    async (
+      request: FastifyRequest,
+      _: FastifyReply,
+      done: (error?: Error) => void,
+    ): Promise<void> => {
+      if (!request?.user || request.user.role !== role) {
+        return done(getUnauthorizedError());
+      }
+    };
 
+  fastify.decorate(AuthStrategy.INJECT_USER, verifyJwtStrategy(false));
   fastify.decorate(AuthStrategy.VERIFY_JWT, verifyJwtStrategy(true));
+  fastify.decorate(AuthStrategy.VERIFY_ADMIN, verifyStatus(UserRole.ADMIN));
 
   done();
 });

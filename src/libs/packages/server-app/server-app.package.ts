@@ -1,4 +1,4 @@
-import fastifyAuth from '@fastify/auth';
+import fastifyAuth, { type FastifyAuthFunction } from '@fastify/auth';
 import cors from '@fastify/cors';
 import fastifyMultipart from '@fastify/multipart';
 import swagger, { type StaticDocumentSpec } from '@fastify/swagger';
@@ -27,10 +27,12 @@ import { type UsersService } from '~/packages/users/users.js';
 
 import { type IConfig } from '../config/config.js';
 import { type EnvironmentSchema } from '../config/types/types.js';
+import { type AuthStrategyHandler } from '../controller/controller.js';
 import { type ValidateFilesStrategyOptions } from '../controller/types/validate-files-strategy-options.type.js';
 import { HttpCode } from '../http/enums/enums.js';
 import { type ILogger } from '../logger/logger.js';
 import { type IJwtService } from '../packages.js';
+import { FileSizeBytes } from './enums/enums.js';
 import {
   type IServerApp,
   type IServerAppApi,
@@ -77,17 +79,30 @@ class ServerApp implements IServerApp {
     this.apis = apis;
     this.usersService = usersService;
     this.jwtService = jwtService;
-
     this.app = Fastify();
   }
 
   public addRoute(parameters: RouteParameters): void {
-    const { path, method, handler, validation, validateFilesStrategy } =
-      parameters;
+    const {
+      path,
+      method,
+      handler,
+      validation,
+      validateFilesStrategy,
+      authStrategy,
+    } = parameters;
 
     const onRequest: onRequestHookHandler[] = [];
     const preHandler: preHandlerHookHandler[] = [];
     const preValidation: preValidationHookHandler[] = [];
+
+    if (authStrategy) {
+      const authStrategyHandler = this.resolveAuthStrategy(authStrategy);
+
+      if (authStrategyHandler) {
+        onRequest.push(authStrategyHandler);
+      }
+    }
 
     if (validateFilesStrategy) {
       preValidation.push(
@@ -134,6 +149,32 @@ class ServerApp implements IServerApp {
     const strategyFunction = this.app[strategy] as StrategyFunction;
 
     return strategyFunction(filesInputConfig);
+  }
+
+  private resolveAuthStrategy(
+    authStrategy?: AuthStrategyHandler,
+  ): undefined | preHandlerHookHandler {
+    if (!authStrategy) {
+      return undefined;
+    }
+
+    if (Array.isArray(authStrategy) && authStrategy.length > 0) {
+      const strategies = authStrategy.map(
+        (strategy) => this.app[strategy as keyof typeof this.app],
+      );
+
+      return this.app.auth(strategies as FastifyAuthFunction[], {
+        relation: 'and',
+      });
+    }
+
+    if (typeof authStrategy === 'string' && authStrategy in this.app) {
+      return this.app.auth([
+        this.app[authStrategy as keyof typeof this.app],
+      ] as FastifyAuthFunction[]);
+    }
+
+    return undefined;
   }
 
   public addRoutes(parameters: RouteParameters[]): void {
@@ -240,6 +281,9 @@ class ServerApp implements IServerApp {
 
     await this.app.register(fastifyMultipart, {
       attachFieldsToBody: true,
+      limits: {
+        fileSize: FileSizeBytes.TEN_MEGABYTES,
+      },
     });
   }
 
