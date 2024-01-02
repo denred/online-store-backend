@@ -8,6 +8,7 @@ const HttpMessage = {
   INVALID_JWT: 'Invalid JWT payload.',
   WRONG_EMAIL: 'User with such email is not registered',
   WRONG_PASSWORD: 'Entered invalid password',
+  INVALID_GOOGLE_TOKEN: 'Failed to obtain valid tokens.',
 } as const;
 
 export { HttpMessage };
