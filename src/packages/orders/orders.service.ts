@@ -1,4 +1,10 @@
-import { type Address, type Order, UserRole, UserStatus } from '@prisma/client';
+import {
+  type Address,
+  type Order,
+  type OrderItem,
+  UserRole,
+  UserStatus,
+} from '@prisma/client';
 
 import { HttpError } from '~/libs/exceptions/http-error.exception.js';
 import { type IService } from '~/libs/interfaces/interfaces.js';
@@ -58,7 +64,9 @@ class OrdersService implements IService {
     }
   }
 
-  private async findByIdOrThrow(id: string): Promise<Order> {
+  private async findByIdOrThrow(
+    id: string,
+  ): Promise<Order & { orderItems: OrderItem[] }> {
     const order = await this.findById(id);
 
     if (!order) {
@@ -71,7 +79,9 @@ class OrdersService implements IService {
     return order;
   }
 
-  public findById(id: string): Promise<Order | null> {
+  public findById(
+    id: string,
+  ): Promise<(Order & { orderItems: OrderItem[] }) | null> {
     return this.ordersRepository.getOrderById(id);
   }
 
@@ -107,6 +117,7 @@ class OrdersService implements IService {
       orderId,
       totalPrice,
       orderItems: orderItems ?? getMappedOrderItems(existingOrderItems),
+      existingOrderItems: order.orderItems,
     });
   }
 

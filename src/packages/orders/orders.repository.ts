@@ -123,23 +123,42 @@ class OrdersRepository {
   }
 
   public updateOrder(payload: UpdateOrderPayload): Promise<Order> {
-    const { orderId, userId, totalPrice, orderItems } = payload;
+    const {
+      orderId,
+      userId,
+      totalPrice,
+      orderItems,
+      existingOrderItems = [],
+    } = payload;
 
     return this.db.$transaction(
       async (tx) => {
-        const existingOrder = await this.getOrderById(orderId);
+        await tx.orderItem.deleteMany({
+          where: {
+            orderId,
+          },
+        });
 
-        if (!existingOrder) {
-          throwError(OrderErrorMessage.NOT_FOUND, HttpCode.NOT_FOUND);
+        for (const orderItem of existingOrderItems) {
+          await this.updateProductQuantity({
+            tx,
+            orderItem,
+            deletionFlag: true,
+          });
         }
 
-        const { orderItems: existingOrderItems } = existingOrder || {};
+        await tx.orderItem.createMany({
+          data: orderItems.map(({ productId, quantity }) => ({
+            orderId,
+            productId,
+            quantity,
+          })),
+        });
 
         for (const orderItem of orderItems) {
           await this.updateProductQuantity({
             tx,
             orderItem,
-            existingOrderItems,
           });
         }
 
@@ -148,12 +167,6 @@ class OrdersRepository {
           data: {
             userId,
             totalPrice,
-            orderItems: {
-              updateMany: orderItems.map(({ productId, quantity }) => ({
-                where: { productId },
-                data: { productId, quantity },
-              })),
-            },
           },
           include: {
             orderItems: true,
