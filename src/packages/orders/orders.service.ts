@@ -82,8 +82,8 @@ class OrdersService implements IService {
 
     const { id: orderId, userId } = order;
 
-    (user || orderDelivery) &&
-      (await this.usersService.update(userId, {
+    if (user || orderDelivery) {
+      await this.usersService.update(userId, {
         ...user,
         addresses: [
           orderDelivery as Omit<
@@ -91,7 +91,8 @@ class OrdersService implements IService {
             'id' | 'userId' | 'createdAt' | 'updatedAt'
           >,
         ],
-      }));
+      });
+    }
 
     const totalPrice =
       orderItems && orderItems.length > 0
@@ -101,7 +102,7 @@ class OrdersService implements IService {
     const existingOrderItems =
       await this.ordersRepository.getOrderItemsByOrderId(orderId);
 
-    return await this.ordersRepository.updateOrder({
+    return this.ordersRepository.updateOrder({
       userId,
       orderId,
       totalPrice,

@@ -26,7 +26,7 @@ class UsersService implements IService {
   }
 
   public async findById(id: string): Promise<User | null> {
-    return await this.usersRepository.findById(id);
+    return this.usersRepository.findById(id);
   }
 
   public async findUserByEmailOrPhone({
@@ -36,7 +36,7 @@ class UsersService implements IService {
     email?: User['email'];
     phone?: User['phone'];
   }): Promise<User | null> {
-    return await this.usersRepository.findUserByEmailOrPhone({ email, phone });
+    return this.usersRepository.findUserByEmailOrPhone({ email, phone });
   }
 
   public async create(payload: CreateUserDTO): Promise<User> {
@@ -48,7 +48,7 @@ class UsersService implements IService {
       throwError(UsersErrorMessage.ALREADY_EXISTS, HttpCode.FORBIDDEN);
     }
 
-    return await this.usersRepository.create(payload);
+    return this.usersRepository.create(payload);
   }
 
   public async registerNewUser(
@@ -90,14 +90,14 @@ class UsersService implements IService {
       throwError(UsersErrorMessage.ALREADY_EXISTS, HttpCode.FORBIDDEN);
     }
 
-    return await this.usersRepository.update(id, {
+    return this.usersRepository.update(id, {
       ...payload,
       addresses,
     });
   }
 
   public async delete(id: string): Promise<boolean> {
-    return await this.usersRepository.delete(id);
+    return this.usersRepository.delete(id);
   }
 }
 

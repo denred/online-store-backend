@@ -84,7 +84,14 @@ class OrdersRepository {
 
     return this.db.$transaction(
       async (tx) => {
-        const order = await tx.order.create({
+        for (const orderItem of orderItems) {
+          await this.updateProductQuantity({
+            tx,
+            orderItem,
+          });
+        }
+
+        return tx.order.create({
           data: {
             userId,
             totalPrice,
@@ -98,15 +105,6 @@ class OrdersRepository {
             orderItems: true,
           },
         });
-
-        for (const orderItem of orderItems) {
-          await this.updateProductQuantity({
-            tx,
-            orderItem,
-          });
-        }
-
-        return order;
       },
       {
         maxWait: TransactionConfigParameters.MAX_WAIT,
@@ -136,7 +134,16 @@ class OrdersRepository {
         }
 
         const { orderItems: existingOrderItems } = existingOrder || {};
-        const order = await tx.order.update({
+
+        for (const orderItem of orderItems) {
+          await this.updateProductQuantity({
+            tx,
+            orderItem,
+            existingOrderItems,
+          });
+        }
+
+        return tx.order.update({
           where: { id: orderId },
           data: {
             userId,
@@ -152,16 +159,6 @@ class OrdersRepository {
             orderItems: true,
           },
         });
-
-        for (const orderItem of orderItems) {
-          await this.updateProductQuantity({
-            tx,
-            orderItem,
-            existingOrderItems,
-          });
-        }
-
-        return order;
       },
       {
         maxWait: TransactionConfigParameters.MAX_WAIT,
@@ -188,7 +185,7 @@ class OrdersRepository {
         },
       });
 
-      return await tx.order.delete({
+      return tx.order.delete({
         where: { id: orderId },
       });
     }));

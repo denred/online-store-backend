@@ -41,7 +41,7 @@ class AuthService {
       });
     }
 
-    return await this.usersService.registerNewUser(payload);
+    return this.usersService.registerNewUser(payload);
   }
 }
 
