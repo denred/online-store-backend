@@ -1,4 +1,4 @@
-import { type Product, Subcategory } from '@prisma/client';
+import { type Product } from '@prisma/client';
 
 import { HttpError } from '~/libs/exceptions/http-error.exception.js';
 import { type IService } from '~/libs/interfaces/interfaces.js';
@@ -102,23 +102,20 @@ class ProductsService implements IService {
   }
 
   public async getTopCategories(): Promise<TopCategory[]> {
-    const subcategories: Subcategory[] = [
-      Subcategory.JACKETS,
-      Subcategory.SWEATERS,
-      Subcategory.OVERSHIRTS,
-      Subcategory.QUILTED,
+    const productIds: string[] = [
+      '655f79e559adbf82bcf2c3c5',
+      '65648b7c89f5931a88a1b98b',
+      '656494d089f5931a88a1b9eb',
+      '6564a4d767318bf71b36c024',
     ];
     const IMAGE_POSITION = 6;
-    const topCategories: TopCategory[] = [];
+    const topCategories = [];
 
-    for (const subcategory of subcategories) {
-      const [product] = await this.search(
-        { subcategory },
-        { size: 1, page: 0 },
-      );
+    for (const id of productIds) {
+      const product = await this.findById(id);
 
       if (product) {
-        const { title, files } = product;
+        const { title, files, subcategory } = product;
         const imageUrl = files[IMAGE_POSITION]
           ? await this.filesService.getUrlById(files[IMAGE_POSITION])
           : null;
