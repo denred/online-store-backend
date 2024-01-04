@@ -1,10 +1,10 @@
 import { type ErrorConstructor, type ValueOf } from '~/libs/types/types.js';
 
-import { type HttpCode } from '../packages/http/enums/enums.js';
+import { HttpCode } from '../packages/http/enums/enums.js';
 import { AppError } from './app-error.exception.js';
 
 type HttpErrorConstructor = ErrorConstructor & {
-  status: ValueOf<typeof HttpCode>;
+  status?: ValueOf<typeof HttpCode>;
 };
 
 class HttpError extends AppError {
@@ -16,7 +16,7 @@ class HttpError extends AppError {
       cause,
     });
 
-    this.status = status;
+    this.status = status ?? HttpCode.BAD_REQUEST;
   }
 }
 

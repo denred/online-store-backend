@@ -30,7 +30,7 @@ class Database {
 
   public async checkConnection(): Promise<void> {
     try {
-      await this.client.user.findFirst({});
+      await this.client.$connect();
       this.logger.info('Connection to the database established.');
     } catch {
       this.logger.error('Error checking database connection.');

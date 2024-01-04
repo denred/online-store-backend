@@ -97,7 +97,7 @@ rules:
     - off
   '@typescript-eslint/return-await':
     - error
-    - always
+    - in-try-catch
   '@typescript-eslint/quotes':
     - error
     - single

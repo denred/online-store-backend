@@ -11,3 +11,5 @@ const productsService = new ProductsService(productsRepository, filesService);
 const productsController = new ProductsController(logger, productsService);
 
 export { productsController };
+export { type ProductsService } from './products.service.js';
+export { productsService };
