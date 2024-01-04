@@ -33,7 +33,7 @@ class ProductsService implements IService {
   }
 
   public async findAll(query: PaginatedQuery): Promise<Product[]> {
-    return await this.productsRepository.findAll(query);
+    return this.productsRepository.findAll(query);
   }
 
   public async findById(id: string): Promise<Product | null> {
@@ -49,26 +49,26 @@ class ProductsService implements IService {
 
     await this.validateFiles(files);
 
-    return await this.productsRepository.create(payload);
+    return this.productsRepository.create(payload);
   }
 
   public async update(id: string, payload: Partial<Product>): Promise<Product> {
     await this.getProductOrThrowError(id);
 
-    return await this.productsRepository.update(id, payload);
+    return this.productsRepository.update(id, payload);
   }
 
   public async delete(id: string): Promise<boolean> {
     await this.getProductOrThrowError(id);
 
-    return await this.productsRepository.delete(id);
+    return this.productsRepository.delete(id);
   }
 
   public async search(
     payload: Partial<Product>,
     query: PaginatedQuery,
   ): Promise<Product[]> {
-    return await this.productsRepository.search(payload, query);
+    return this.productsRepository.search(payload, query);
   }
 
   private async validateFiles(files: string[]): Promise<void> {

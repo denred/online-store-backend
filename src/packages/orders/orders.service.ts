@@ -11,7 +11,7 @@ import { type IService } from '~/libs/interfaces/interfaces.js';
 import { HttpCode } from '~/libs/packages/http/http.js';
 
 import { type UsersService } from '../users/users.js';
-import { OrderErrorMessage } from './libs/enums/order-error-message.enum.js';
+import { OrderErrorMessage } from './libs/enums/enums.js';
 import {
   getMappedOrderItems,
   getOrderTotalPrice,

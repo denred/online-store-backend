@@ -1,13 +1,9 @@
 import Joi from 'joi';
 
-import { SubscriptionValidationMessage } from '../enums/enums.js';
+import { getErrorMessages } from '~/libs/validations/validations.js';
 
 const subscriptionBodyValidation = Joi.object({
-  email: Joi.string().email().required().messages({
-    'string.base': SubscriptionValidationMessage.STRING_BASE,
-    'string.email': SubscriptionValidationMessage.STRING_EMAIL,
-    'any.required': SubscriptionValidationMessage.ANY_REQUIRED,
-  }),
+  email: Joi.string().email().required().messages(getErrorMessages()),
   firstName: Joi.string(),
   lastName: Joi.string(),
   preferences: Joi.object({

@@ -1,99 +1,55 @@
 import Joi from 'joi';
 
-import { CommonValidationRules } from '~/libs/enums/enums.js';
+import {
+  CommonValidationRules,
+  getErrorMessages,
+} from '~/libs/validations/validations.js';
 
-import { OrderErrorMessage, OrdersValidationRules } from '../enums/enums.js';
+import { OrdersValidationRules } from '../enums/enums.js';
 
 const commonOrderSchema = {
   orderItemsSchema: Joi.array()
     .items(
       Joi.object({
-        productId: Joi.string().required().messages({
-          'string.base': OrderErrorMessage.STRING_BASE,
-          'string.empty': OrderErrorMessage.FIELD_REQUIRED,
-          'any.required': OrderErrorMessage.FIELD_REQUIRED,
-        }),
+        productId: Joi.string().required().messages(getErrorMessages()),
 
         quantity: Joi.number()
           .integer()
           .min(OrdersValidationRules.MIN_QUANTITY)
           .required()
-          .messages({
-            'number.base': OrderErrorMessage.FIELD_INTEGER,
-            'number.integer': OrderErrorMessage.FIELD_INTEGER,
-            'number.min': OrderErrorMessage.FIELD_MIN_VALUE,
-            'any.required': OrderErrorMessage.FIELD_REQUIRED,
-          }),
-      }).messages({
-        'array.base': OrderErrorMessage.FIELD_ARRAY,
-        'array.empty': OrderErrorMessage.EMPTY_ARRAY,
-      }),
+          .messages(getErrorMessages()),
+      }).messages(getErrorMessages()),
     )
-    .messages({
-      'array.base': OrderErrorMessage.FIELD_ARRAY,
-      'array.empty': OrderErrorMessage.EMPTY_ARRAY,
-    }),
+    .messages(getErrorMessages()),
   orderDeliverySchema: {
     address: Joi.string()
       .min(CommonValidationRules.NAME_MIN_LENGTH)
       .max(CommonValidationRules.NAME_MAX_LENGTH)
-      .messages({
-        'string.base': OrderErrorMessage.STRING_BASE,
-        'string.empty': OrderErrorMessage.FIELD_REQUIRED,
-        'string.min': OrderErrorMessage.FIELD_MIN_LENGTH,
-        'string.max': OrderErrorMessage.FIELD_MAX_LENGTH,
-        'any.required': OrderErrorMessage.FIELD_REQUIRED,
-      }),
+      .messages(getErrorMessages()),
 
     moreInfo: Joi.string()
       .max(OrdersValidationRules.MORE_INFO_MAX_LENGTH)
-      .messages({
-        'string.base': OrderErrorMessage.STRING_BASE,
-        'string.max': OrderErrorMessage.FIELD_MAX_LENGTH,
-      }),
+      .messages(getErrorMessages()),
 
     zipCode: Joi.string()
       .length(OrdersValidationRules.ZIP_CODE_LENGTH)
       .pattern(OrdersValidationRules.ZIP_CODE_PATTERN)
-      .messages({
-        'string.base': OrderErrorMessage.STRING_BASE,
-        'string.empty': OrderErrorMessage.FIELD_REQUIRED,
-        'any.required': OrderErrorMessage.FIELD_REQUIRED,
-        'string.pattern.base': OrderErrorMessage.ZIP_CODE_NOT_NUMERIC,
-      }),
+      .messages(getErrorMessages()),
 
     city: Joi.string()
       .min(CommonValidationRules.NAME_MIN_LENGTH)
       .max(CommonValidationRules.NAME_MAX_LENGTH)
-      .messages({
-        'string.base': OrderErrorMessage.STRING_BASE,
-        'string.empty': OrderErrorMessage.FIELD_REQUIRED,
-        'string.min': OrderErrorMessage.FIELD_MIN_LENGTH,
-        'string.max': OrderErrorMessage.FIELD_MAX_LENGTH,
-        'any.required': OrderErrorMessage.FIELD_REQUIRED,
-      }),
+      .messages(getErrorMessages()),
 
     state: Joi.string()
       .min(CommonValidationRules.NAME_MIN_LENGTH)
       .max(CommonValidationRules.NAME_MAX_LENGTH)
-      .messages({
-        'string.base': OrderErrorMessage.STRING_BASE,
-        'string.empty': OrderErrorMessage.FIELD_REQUIRED,
-        'string.min': OrderErrorMessage.FIELD_MIN_LENGTH,
-        'string.max': OrderErrorMessage.FIELD_MAX_LENGTH,
-        'any.required': OrderErrorMessage.FIELD_REQUIRED,
-      }),
+      .messages(getErrorMessages()),
 
     country: Joi.string()
       .min(CommonValidationRules.NAME_MIN_LENGTH)
       .max(CommonValidationRules.NAME_MAX_LENGTH)
-      .messages({
-        'string.base': OrderErrorMessage.STRING_BASE,
-        'string.empty': OrderErrorMessage.FIELD_REQUIRED,
-        'string.min': OrderErrorMessage.FIELD_MIN_LENGTH,
-        'string.max': OrderErrorMessage.FIELD_MAX_LENGTH,
-        'any.required': OrderErrorMessage.FIELD_REQUIRED,
-      }),
+      .messages(getErrorMessages()),
   },
 };
 
