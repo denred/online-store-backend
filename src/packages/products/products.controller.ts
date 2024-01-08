@@ -48,6 +48,7 @@ import { type ProductsService } from './products.service.js';
  *             $ref: '#/components/schemas/Size'
  *         price:
  *           type: number
+ *           example: 199.9
  *         brand:
  *           type: string
  *         collection:
@@ -60,6 +61,17 @@ import { type ProductsService } from './products.service.js';
  *             type: string
  *             format: binary
  *             example: 'id'
+ *
+ *     GetProductsResponseDto:
+ *       type: object
+ *       properties:
+ *         products:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Product'
+ *         pages:
+ *           type: number
+ *           example: 30
  *
  *     CreateProductBody:
  *       type: object
@@ -382,7 +394,7 @@ class ProductsController extends Controller {
    *         name: page
    *         schema:
    *           type: integer
-   *           default: 1
+   *           default: 0
    *         description: Page number
    *       - in: query
    *         name: size
@@ -396,9 +408,7 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               type: array
-   *               items:
-   *                 $ref: '#/components/schemas/Product'
+   *               $ref: '#/components/schemas/GetProductsResponseDto'
    */
   private async findAll(
     options: ApiHandlerOptions<{ query: PaginatedQuery }>,
@@ -545,7 +555,7 @@ class ProductsController extends Controller {
    *         name: page
    *         schema:
    *           type: integer
-   *           default: 1
+   *           default: 0
    *         description: Page number
    *       - in: query
    *         name: size
@@ -565,9 +575,7 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               type: array
-   *               items:
-   *                 $ref: '#/components/schemas/Product'
+   *               $ref: '#/components/schemas/GetProductsResponseDto'
    *       422:
    *         description: Unprocessable Entity
    *         content:
