@@ -13,9 +13,13 @@ import { commonGetPageQuery } from '~/libs/validations/validations.js';
 
 import { ProductsApiPath } from './libs/enums/enums.js';
 import { type CreateProductDto } from './libs/types/create-product-dto.type.js';
-import { type ImageUrl } from './libs/types/types.js';
+import {
+  type GetFilteredProductRequestDto,
+  type ImageUrl,
+} from './libs/types/types.js';
 import {
   createProductSchema,
+  getSortedAndFilteredProductsSchema,
   productParametersSchema,
   updateProductSchema,
 } from './libs/validations/validations.js';
@@ -60,6 +64,38 @@ import { type ProductsService } from './products.service.js';
  *             type: string
  *             format: binary
  *             example: 'id'
+ *
+ *     GetProductsResponseDto:
+ *       type: object
+ *       properties:
+ *         products:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Product'
+ *         total:
+ *           type: number
+ *           example: 30
+ *
+ *     GetFilteredProductRequestDto:
+ *       type: object
+ *       properties:
+ *         colures:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Colour'
+ *         sizes:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Size'
+ *         priceRange:
+ *           type: object
+ *           properties:
+ *             min:
+ *               type: number
+ *               example: 0
+ *             max:
+ *               type: number
+ *               example: 100
  *
  *     CreateProductBody:
  *       type: object
@@ -112,6 +148,12 @@ import { type ProductsService } from './products.service.js';
  *           type: number
  *         productId:
  *           type: string
+ *
+ *     SortedParams:
+ *       type: string
+ *       enum:
+ *         - price-asc
+ *         - price-desc
  *
  *     Size:
  *       type: string
@@ -317,6 +359,22 @@ class ProductsController extends Controller {
       path: ProductsApiPath.NEW,
       method: 'GET',
       handler: () => this.getNewProducts(),
+    });
+
+    this.addRoute({
+      path: ProductsApiPath.FILTER,
+      method: 'POST',
+      validation: {
+        body: getSortedAndFilteredProductsSchema,
+        query: commonGetPageQuery,
+      },
+      handler: (options) =>
+        this.getSortedAndFilteredProducts(
+          options as ApiHandlerOptions<{
+            body: GetFilteredProductRequestDto;
+            query: PaginatedQuery;
+          }>,
+        ),
     });
   }
 
@@ -689,6 +747,75 @@ class ProductsController extends Controller {
     return {
       status: HttpCode.OK,
       payload: newProducts,
+    };
+  }
+
+  /**
+   * @swagger
+   * /products/filter:
+   *   post:
+   *     tags:
+   *       - Products API
+   *     summary: Filter products
+   *     description: Filter products
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           default: 0
+   *         description: Page number
+   *       - in: query
+   *         name: size
+   *         schema:
+   *           type: integer
+   *           default: 10
+   *         description: Number of items per page
+   *       - in: query
+   *         name: sorting
+   *         description: Sorting type
+   *         schema:
+   *           ref: '#/components/schemas/SortedParams'
+   *           default: 'price-asc'
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/GetFilteredProductRequestDto'
+   *     responses:
+   *       200:
+   *         description: Successful products filter.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/GetProductsResponseDto'
+   *       422:
+   *         description: Unprocessable Entity
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ProductValidationError'
+   *       400:
+   *         description: Bad Request
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
+   */
+  private async getSortedAndFilteredProducts(
+    options: ApiHandlerOptions<{
+      body: GetFilteredProductRequestDto;
+      query: PaginatedQuery;
+    }>,
+  ): Promise<ApiHandlerResponse> {
+    const { body, query } = options;
+    const sortedAndFilteredProducts =
+      await this.productsService.getSortedAndFilteredProducts(body, query);
+
+    return {
+      status: HttpCode.OK,
+      payload: sortedAndFilteredProducts,
     };
   }
 }

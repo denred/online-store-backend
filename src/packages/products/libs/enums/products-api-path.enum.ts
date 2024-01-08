@@ -5,6 +5,7 @@ const ProductsApiPath = {
   TOP: '/top',
   IMAGES: '/images/:id',
   NEW: '/new',
+  FILTER: '/filter',
 } as const;
 
 export { ProductsApiPath };

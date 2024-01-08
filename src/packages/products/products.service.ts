@@ -10,6 +10,7 @@ import { ProductValidationRules } from './libs/enums/product-validation-rules.en
 import { getBuildId, getBuildImageName } from './libs/helpers/helpers.js';
 import {
   type CreateProductDto,
+  type GetFilteredProductRequestDto,
   type ImageUrl,
   type TopCategory,
 } from './libs/types/types.js';
@@ -65,6 +66,26 @@ class ProductsService implements IService {
     query: PaginatedQuery,
   ): Promise<Product[]> {
     return await this.productsRepository.search(payload, query);
+  }
+
+  public async getSortedAndFilteredProducts(
+    payload: GetFilteredProductRequestDto,
+    query: PaginatedQuery,
+  ): Promise<{ products: Product[]; total: number }> {
+    const products = await this.productsRepository.getSortedAndFilteredProducts(
+      payload,
+      query,
+    );
+
+    const totalProducts =
+      await this.productsRepository.getSortedAndFilteredProducts(payload, {
+        page: 0,
+        size: await this.productsRepository.count(),
+      });
+
+    const total = totalProducts.length;
+
+    return { products, total };
   }
 
   private async validateFiles(files: string[]): Promise<void> {
