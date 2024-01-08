@@ -1,9 +1,11 @@
 import { type Prisma, type PrismaClient, type Product } from '@prisma/client';
 
+import { ProductSortParameter } from '~/libs/enums/product-sort-parameter.enum.js';
 import { type IRepository } from '~/libs/interfaces/interfaces.js';
 import { type PaginatedQuery } from '~/libs/types/types.js';
 
 import { getSkip, getTake } from './libs/helpers/helpers.js';
+import { type GetFilteredProductRequestDto } from './libs/types/types.js';
 
 class ProductsRepository implements IRepository {
   private db: Pick<PrismaClient, 'product'>;
@@ -46,6 +48,32 @@ class ProductsRepository implements IRepository {
       skip: getSkip(query),
       take: getTake(query, await this.count()),
       where: whereClause,
+    });
+  }
+
+  public async getSortedAndFilteredProducts(
+    payload: GetFilteredProductRequestDto,
+    query: PaginatedQuery,
+  ): Promise<Product[]> {
+    const { colures, sizes, priceRange } = payload;
+    const { sorting } = query;
+
+    const whereClause: Prisma.ProductWhereInput = {
+      ...(colures && { colour: { in: colures } }),
+      ...(sizes && { size: { hasSome: sizes } }),
+      ...(priceRange && {
+        price: { gte: priceRange.min, lte: priceRange.max },
+      }),
+    };
+
+    return await this.db.product.findMany({
+      skip: getSkip(query),
+      take: getTake(query, await this.count()),
+      where: whereClause,
+      orderBy: {
+        ...(sorting === ProductSortParameter.PRICE_ASC && { price: 'asc' }),
+        ...(sorting === ProductSortParameter.PRICE_DESC && { price: 'desc' }),
+      },
     });
   }
 
