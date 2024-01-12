@@ -6,7 +6,10 @@ import { HttpCode, HttpMessage } from '~/libs/packages/http/http.js';
 import { type PaginatedQuery } from '~/libs/types/types.js';
 
 import { type FilesService } from '../files/files.js';
-import { ProductValidationRules } from './libs/enums/product-validation-rules.enum.js';
+import {
+  ProductSubcategory,
+  ProductValidationRules,
+} from './libs/enums/enums.js';
 import { getBuildId, getBuildImageName } from './libs/helpers/helpers.js';
 import {
   type CreateProductDto,
@@ -122,7 +125,7 @@ class ProductsService implements IService {
         if (title && imageUrl) {
           topCategories.push({
             id: getBuildId(title),
-            name: subcategory,
+            name: ProductSubcategory[subcategory],
             url: imageUrl,
           });
         }
