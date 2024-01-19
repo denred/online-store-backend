@@ -6,6 +6,7 @@ const ProductsApiPath = {
   IMAGES: '/images/:id',
   NEW: '/new',
   FILTER: '/filter',
+  UPDATE_QUANTITY: '/update-quantity/:id',
 } as const;
 
 export { ProductsApiPath };

@@ -21,6 +21,7 @@ import {
   createProductSchema,
   getSortedAndFilteredProductsSchema,
   productParametersSchema,
+  productQuantitySchema,
   updateProductSchema,
 } from './libs/validations/validations.js';
 import { type ProductsService } from './products.service.js';
@@ -34,6 +35,8 @@ import { type ProductsService } from './products.service.js';
  *       properties:
  *         id:
  *           type: string
+ *         vendorCode:
+ *           type: number
  *         category:
  *           $ref: '#/components/schemas/Category'
  *         subcategory:
@@ -52,18 +55,32 @@ import { type ProductsService } from './products.service.js';
  *             $ref: '#/components/schemas/Size'
  *         price:
  *           type: number
+ *           example: 199.9
  *         brand:
  *           type: string
  *         collection:
  *           type: string
  *         manufacturer:
  *           type: string
+ *         quantity:
+ *           type: integer
  *         files:
  *           type: array
  *           items:
  *             type: string
  *             format: binary
- *             example: 'id'
+ *             example: "id"
+ *
+ *     GetProductsResponseDto:
+ *       type: object
+ *       properties:
+ *         products:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Product'
+ *         pages:
+ *           type: number
+ *           example: 30
  *
  *     GetProductsResponseDto:
  *       type: object
@@ -129,13 +146,16 @@ import { type ProductsService } from './products.service.js';
  *         manufacturer:
  *           type: string
  *           example: Bangladesh
+ *         quantity:
+ *           type: integer
+ *           example: 5
  *         files:
  *           type: array
  *           items:
  *             type: string
  *             format: binary
  *             description: image id
- *             example: "655ce5fde572c6437cdd3059"
+ *             example: '655ce5fde572c6437cdd3059'
  *
  *     Review:
  *       type: object
@@ -209,7 +229,7 @@ import { type ProductsService } from './products.service.js';
  *             - COMMON
  *             - VALIDATION
  *
- *     ProductFileDoesNotExist:
+ *     FileDoesNotExist:
  *       allOf:
  *         - $ref: '#/components/schemas/ErrorType'
  *         - type: object
@@ -217,7 +237,7 @@ import { type ProductsService } from './products.service.js';
  *             message:
  *               type: string
  *               enum:
- *                 - File with such id does not exist!
+ *                 - File does not exist!
  *
  *     ProductValidationError:
  *       allOf:
@@ -227,7 +247,27 @@ import { type ProductsService } from './products.service.js';
  *             message:
  *               type: string
  *               enum:
- *                 - Product isn't valid!
+ *                 - 'Product is not valid!'
+ *
+ *     ProductNotFoundError:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ErrorType'
+ *         - type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               enum:
+ *                 - Product with such id does not exist!
+ *
+ *     ProductInvalidIdError:
+ *       allOf:
+ *         - $ref: '#/components/schemas/ErrorType'
+ *         - type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *               enum:
+ *                 - Products id is not valid!
  *
  *     TopCategory:
  *       type: object
@@ -240,6 +280,7 @@ import { type ProductsService } from './products.service.js';
  *         url:
  *           type: string
  *           example: 'https://imgbucketonline.s3.eu-north-1.amazonaws.com//4963b077-b3ac-4ab0-a027-ec9a23bab23d?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6AT3X3LBYHSX3HMJ%2F20231128%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20231128T072832Z&X-Amz-Expires=3600&X-Amz-Signature=fbb0eccc5dbec7c08513ebc8103a5d6b3b24ff1c108ac594bbecca54dcd7eb11&X-Amz-SignedHeaders=host&x-id=GetObject'
+ *
  *
  *     ImageURL:
  *       type: object
@@ -376,6 +417,22 @@ class ProductsController extends Controller {
           }>,
         ),
     });
+
+    this.addRoute({
+      path: ProductsApiPath.UPDATE_QUANTITY,
+      method: 'PUT',
+      validation: {
+        params: productParametersSchema,
+        body: productQuantitySchema,
+      },
+      handler: (options) =>
+        this.updateQuantity(
+          options as ApiHandlerOptions<{
+            params: { id: string };
+            body: { quantity: number };
+          }>,
+        ),
+    });
   }
 
   /**
@@ -412,7 +469,7 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
+   *               $ref: '#/components/schemas/FileDoesNotExist'
    */
   private async create(
     options: ApiHandlerOptions<{
@@ -440,7 +497,7 @@ class ProductsController extends Controller {
    *         name: page
    *         schema:
    *           type: integer
-   *           default: 1
+   *           default: 0
    *         description: Page number
    *       - in: query
    *         name: size
@@ -454,9 +511,7 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               type: array
-   *               items:
-   *                 $ref: '#/components/schemas/Product'
+   *               $ref: '#/components/schemas/GetProductsResponseDto'
    */
   private async findAll(
     options: ApiHandlerOptions<{ query: PaginatedQuery }>,
@@ -496,7 +551,7 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
+   *               $ref: '#/components/schemas/ProductInvalidIdError'
    */
   private async findById(
     options: ApiHandlerOptions<{ params: { id: string } }>,
@@ -537,8 +592,26 @@ class ProductsController extends Controller {
    *           application/json:
    *             schema:
    *               $ref: '#/components/schemas/Product'
-   *       '404':
-   *         description: Product not found.
+   *       404:
+   *         description: Product not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ProductNotFoundError'
+   *
+   *       422:
+   *         description: Unprocessable Entity
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ProductValidationError'
+   *
+   *       400:
+   *         description: Bad Request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ProductInvalidIdError'
    *
    */
   private async update(
@@ -574,8 +647,12 @@ class ProductsController extends Controller {
    *     responses:
    *       '204':
    *         description: Product deleted successfully.
-   *       '404':
-   *         description: Product not found.
+   *       404:
+   *         description: Product not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ProductNotFoundError'
    */
   private async delete(
     options: ApiHandlerOptions<{ params: { id: string } }>,
@@ -603,7 +680,7 @@ class ProductsController extends Controller {
    *         name: page
    *         schema:
    *           type: integer
-   *           default: 1
+   *           default: 0
    *         description: Page number
    *       - in: query
    *         name: size
@@ -623,9 +700,7 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               type: array
-   *               items:
-   *                 $ref: '#/components/schemas/Product'
+   *               $ref: '#/components/schemas/GetProductsResponseDto'
    *       422:
    *         description: Unprocessable Entity
    *         content:
@@ -637,7 +712,7 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
+   *               $ref: '#/components/schemas/FileDoesNotExist'
    */
   private async search(
     options: ApiHandlerOptions<{
@@ -708,7 +783,7 @@ class ProductsController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/ProductFileDoesNotExist'
+   *               $ref: '#/components/schemas/FileDoesNotExist'
    */
   private async getImages(
     options: ApiHandlerOptions<{ params: { id: string } }>,
@@ -816,6 +891,81 @@ class ProductsController extends Controller {
     return {
       status: HttpCode.OK,
       payload: sortedAndFilteredProducts,
+    };
+  }
+
+  /**
+   * @swagger
+   * /products/update-quantity/{id}:
+   *   put:
+   *     tags:
+   *       - Products API
+   *     summary: Update product quantity by ID
+   *     description: Update an existing product by providing its ID
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         description: ID of the product to be updated
+   *         schema:
+   *           type: string
+   *     requestBody:
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - quantity
+   *             properties:
+   *               quantity:
+   *                 type: number
+   *                 description: New quantity for the product
+   *     responses:
+   *       '200':
+   *         description: Successful product update.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Product'
+   *
+   *       404:
+   *         description: Product not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ProductNotFoundError'
+   *
+   *       422:
+   *         description: Unprocessable Entity
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ProductValidationError'
+   *
+   *       400:
+   *         description: Bad Request.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ProductInvalidIdError'
+   *
+   */
+  private async updateQuantity(
+    options: ApiHandlerOptions<{
+      params: { id: string };
+      body: { quantity: number };
+    }>,
+  ): Promise<ApiHandlerResponse> {
+    const { id } = options.params;
+    const { quantity } = options.body;
+    const updatedProduct = await this.productsService.updateProductQuantity(
+      id,
+      quantity,
+    );
+
+    return {
+      status: HttpCode.OK,
+      payload: updatedProduct,
     };
   }
 }

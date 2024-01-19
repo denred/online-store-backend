@@ -15,18 +15,18 @@ class ProductsRepository implements IRepository {
   }
 
   public async count(): Promise<number> {
-    return await this.db.product.count();
+    return this.db.product.count();
   }
 
   public async findAll(query: PaginatedQuery): Promise<Product[]> {
-    return await this.db.product.findMany({
+    return this.db.product.findMany({
       skip: getSkip(query),
       take: getTake(query, await this.count()),
     });
   }
 
   public async findById(id: string): Promise<Product[]> {
-    return await this.db.product.findMany({ where: { id } });
+    return this.db.product.findMany({ where: { id } });
   }
 
   public async search(
@@ -44,7 +44,7 @@ class ProductsRepository implements IRepository {
       ...rest,
     };
 
-    return await this.db.product.findMany({
+    return this.db.product.findMany({
       skip: getSkip(query),
       take: getTake(query, await this.count()),
       where: whereClause,
@@ -80,11 +80,11 @@ class ProductsRepository implements IRepository {
   public async create(
     payload: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Product> {
-    return await this.db.product.create({ data: payload });
+    return this.db.product.create({ data: payload });
   }
 
   public async update(id: string, payload: Partial<Product>): Promise<Product> {
-    return await this.db.product.update({
+    return this.db.product.update({
       where: { id },
       data: payload,
     });
@@ -92,6 +92,15 @@ class ProductsRepository implements IRepository {
 
   public async delete(id: string): Promise<boolean> {
     return !!(await this.db.product.delete({ where: { id } }));
+  }
+
+  public async getMaxVendorCode(): Promise<number | null> {
+    const lastProduct = await this.db.product.findFirst({
+      select: { vendorCode: true },
+      orderBy: { vendorCode: 'desc' },
+    });
+
+    return lastProduct?.vendorCode ?? null;
   }
 }
 
