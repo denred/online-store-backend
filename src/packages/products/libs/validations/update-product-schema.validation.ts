@@ -1,9 +1,9 @@
 import Joi from 'joi';
 
-import { commonOrderSchema } from '~/packages/orders/libs/validations/common-order-schema.validation.js';
+import { commonProductsSchema } from './common-products-schema.validation.js';
 
 const updateProductSchema = Joi.object({
-  ...commonOrderSchema,
+  ...commonProductsSchema,
 });
 
 export { updateProductSchema };
