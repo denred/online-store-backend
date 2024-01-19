@@ -13,6 +13,7 @@ import {
 import { getBuildId, getBuildImageName } from './libs/helpers/helpers.js';
 import {
   type CreateProductDto,
+  type GetFilteredProductRequestDto,
   type GetProductsResponseDto,
   type ImageUrl,
   type TopCategory,
@@ -95,6 +96,27 @@ class ProductsService implements IService {
       page: 0,
       size: await this.productsRepository.count(),
     });
+    const pages = Math.ceil(totalProducts.length / size);
+
+    return { products, pages };
+  }
+
+  public async getSortedAndFilteredProducts(
+    payload: GetFilteredProductRequestDto,
+    query: PaginatedQuery,
+  ): Promise<GetProductsResponseDto> {
+    const { size } = query;
+    const products = await this.productsRepository.getSortedAndFilteredProducts(
+      payload,
+      query,
+    );
+
+    const totalProducts =
+      await this.productsRepository.getSortedAndFilteredProducts(payload, {
+        page: 0,
+        size: await this.productsRepository.count(),
+      });
+
     const pages = Math.ceil(totalProducts.length / size);
 
     return { products, pages };
