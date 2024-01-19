@@ -1,6 +1,6 @@
 import { type PaginatedQuery } from '~/libs/types/types.js';
 
-const getIsObjectEmpty = (object: Record<string, number>): boolean =>
+const getIsObjectEmpty = (object: PaginatedQuery): boolean =>
   Object.keys(object).length === 0;
 
 const getSkip = (query: PaginatedQuery): number =>

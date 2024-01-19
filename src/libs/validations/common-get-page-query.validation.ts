@@ -10,6 +10,9 @@ const commonGetPageQuery = Joi.object<PaginatedQuery, true>({
   page: Joi.number().integer().min(0).messages({
     'number.base': CommonValidationMessage.PAGE_INDEX_MUST_BE_NUMBER,
   }),
+  sorting: Joi.string().messages({
+    'string.base': CommonValidationMessage.SORTING_MUST_BE_STRING,
+  }),
 });
 
 export { commonGetPageQuery };

@@ -34,6 +34,7 @@ enum Subcategory {
   JACKETS
   COATS
   TRENCH
+  FIELD_JACKETS
   GILETS
   OVERSHIRTS
   SWEATERS
@@ -75,6 +76,7 @@ model User {
 
 model Product {
   id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  vendorCode   Int?        @unique
   category     Category
   subcategory  Subcategory
   title        String

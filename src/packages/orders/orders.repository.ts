@@ -84,7 +84,14 @@ class OrdersRepository {
 
     return this.db.$transaction(
       async (tx) => {
-        const order = await tx.order.create({
+        for (const orderItem of orderItems) {
+          await this.updateProductQuantity({
+            tx,
+            orderItem,
+          });
+        }
+
+        return tx.order.create({
           data: {
             userId,
             totalPrice,
@@ -98,15 +105,6 @@ class OrdersRepository {
             orderItems: true,
           },
         });
-
-        for (const orderItem of orderItems) {
-          await this.updateProductQuantity({
-            tx,
-            orderItem,
-          });
-        }
-
-        return order;
       },
       {
         maxWait: TransactionConfigParameters.MAX_WAIT,
@@ -125,43 +123,55 @@ class OrdersRepository {
   }
 
   public updateOrder(payload: UpdateOrderPayload): Promise<Order> {
-    const { orderId, userId, totalPrice, orderItems } = payload;
+    const {
+      orderId,
+      userId,
+      totalPrice,
+      orderItems,
+      existingOrderItems = [],
+    } = payload;
 
     return this.db.$transaction(
       async (tx) => {
-        const existingOrder = await this.getOrderById(orderId);
+        await tx.orderItem.deleteMany({
+          where: {
+            orderId,
+          },
+        });
 
-        if (!existingOrder) {
-          throwError(OrderErrorMessage.NOT_FOUND, HttpCode.NOT_FOUND);
+        for (const orderItem of existingOrderItems) {
+          await this.updateProductQuantity({
+            tx,
+            orderItem,
+            deletionFlag: true,
+          });
         }
 
-        const { orderItems: existingOrderItems } = existingOrder || {};
-        const order = await tx.order.update({
-          where: { id: orderId },
-          data: {
-            userId,
-            totalPrice,
-            orderItems: {
-              updateMany: orderItems.map(({ productId, quantity }) => ({
-                where: { productId },
-                data: { productId, quantity },
-              })),
-            },
-          },
-          include: {
-            orderItems: true,
-          },
+        await tx.orderItem.createMany({
+          data: orderItems.map(({ productId, quantity }) => ({
+            orderId,
+            productId,
+            quantity,
+          })),
         });
 
         for (const orderItem of orderItems) {
           await this.updateProductQuantity({
             tx,
             orderItem,
-            existingOrderItems,
           });
         }
 
-        return order;
+        return tx.order.update({
+          where: { id: orderId },
+          data: {
+            userId,
+            totalPrice,
+          },
+          include: {
+            orderItems: true,
+          },
+        });
       },
       {
         maxWait: TransactionConfigParameters.MAX_WAIT,
@@ -188,7 +198,7 @@ class OrdersRepository {
         },
       });
 
-      return await tx.order.delete({
+      return tx.order.delete({
         where: { id: orderId },
       });
     }));
