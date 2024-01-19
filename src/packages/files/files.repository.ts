@@ -12,23 +12,23 @@ class FilesRepository implements IRepository {
   }
 
   public async findAll(): Promise<File[]> {
-    return await this.db.file.findMany();
+    return this.db.file.findMany();
   }
 
   public async findById(id: string): Promise<File[]> {
-    return await this.db.file.findMany({ where: { id } });
+    return this.db.file.findMany({ where: { id } });
   }
 
   public async find(payload: Partial<File>): Promise<File[]> {
-    return await this.db.file.findMany({ where: payload });
+    return this.db.file.findMany({ where: payload });
   }
 
   public async create(payload: CreateFileDto): Promise<File> {
-    return await this.db.file.create({ data: payload });
+    return this.db.file.create({ data: payload });
   }
 
   public async update(id: string, payload: Partial<File>): Promise<File> {
-    return await this.db.file.update({
+    return this.db.file.update({
       where: { id },
       data: payload,
     });

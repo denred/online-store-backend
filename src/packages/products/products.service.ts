@@ -31,8 +31,12 @@ class ProductsService implements IService {
     this.filesService = filesService;
   }
 
+  public updateProductQuantity(id: string, quantity: number): Promise<Product> {
+    return this.productsRepository.update(id, { quantity });
+  }
+
   public async findAll(query: PaginatedQuery): Promise<Product[]> {
-    return await this.productsRepository.findAll(query);
+    return this.productsRepository.findAll(query);
   }
 
   public async findById(id: string): Promise<Product | null> {
@@ -48,26 +52,26 @@ class ProductsService implements IService {
 
     await this.validateFiles(files);
 
-    return await this.productsRepository.create(payload);
+    return this.productsRepository.create(payload);
   }
 
   public async update(id: string, payload: Partial<Product>): Promise<Product> {
-    await this.isProductExist(id);
+    await this.getProductOrThrowError(id);
 
-    return await this.productsRepository.update(id, payload);
+    return this.productsRepository.update(id, payload);
   }
 
   public async delete(id: string): Promise<boolean> {
-    await this.isProductExist(id);
+    await this.getProductOrThrowError(id);
 
-    return await this.productsRepository.delete(id);
+    return this.productsRepository.delete(id);
   }
 
   public async search(
     payload: Partial<Product>,
     query: PaginatedQuery,
   ): Promise<Product[]> {
-    return await this.productsRepository.search(payload, query);
+    return this.productsRepository.search(payload, query);
   }
 
   private async validateFiles(files: string[]): Promise<void> {
@@ -82,25 +86,22 @@ class ProductsService implements IService {
 
     if (!isValidPrismaId) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
         message: HttpMessage.INVALID_ID,
       });
     }
   }
 
-  private async isProductExist(id: string): Promise<boolean> {
-    this.isValidPrismaId(id);
-
+  private async getProductOrThrowError(id: string): Promise<Product> {
     const product = await this.findById(id);
 
     if (!product) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
+        status: HttpCode.NOT_FOUND,
         message: HttpMessage.PRODUCT_DOES_NOT_EXIST,
       });
     }
 
-    return true;
+    return product;
   }
 
   public async getTopCategories(): Promise<TopCategory[]> {

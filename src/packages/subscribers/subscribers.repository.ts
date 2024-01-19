@@ -27,13 +27,13 @@ class SubscribersRepository {
   public async createPreferences(
     payload: Omit<Preferences, 'id'>,
   ): Promise<Preferences> {
-    return await this.db.preferences.create({ data: payload });
+    return this.db.preferences.create({ data: payload });
   }
 
   public async subscribe(
     payload: Omit<Subscription, 'id'>,
   ): Promise<Subscription> {
-    return await this.db.subscription.create({
+    return this.db.subscription.create({
       data: payload,
     });
   }
@@ -65,13 +65,13 @@ class SubscribersRepository {
   public async getSubscriptionByEmail(
     email: string,
   ): Promise<Subscription | null> {
-    return await this.db.subscription.findUnique({ where: { email } });
+    return this.db.subscription.findUnique({ where: { email } });
   }
 
   public async getSubscriptionByEmailWithPreferences(
     email: string,
   ): Promise<SubscriptionWithPreferences | null> {
-    return await this.db.subscription.findUnique({
+    return this.db.subscription.findUnique({
       where: { email },
       include: { preferences: true },
     });
@@ -81,7 +81,7 @@ class SubscribersRepository {
     id: string,
     preferences: PreferencesBody,
   ): Promise<Preferences> {
-    return await this.db.preferences.update({
+    return this.db.preferences.update({
       where: { id },
       data: preferences,
     });
