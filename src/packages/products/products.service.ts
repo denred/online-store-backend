@@ -13,6 +13,7 @@ import {
 import { getBuildId, getBuildImageName } from './libs/helpers/helpers.js';
 import {
   type CreateProductDto,
+  type GetProductsResponseDto,
   type ImageUrl,
   type TopCategory,
 } from './libs/types/types.js';
@@ -35,8 +36,13 @@ class ProductsService implements IService {
     return this.productsRepository.update(id, { quantity });
   }
 
-  public async findAll(query: PaginatedQuery): Promise<Product[]> {
-    return this.productsRepository.findAll(query);
+  public async findAll(query: PaginatedQuery): Promise<GetProductsResponseDto> {
+    const { size } = query;
+    const products = await this.productsRepository.findAll(query);
+    const totalProducts = await this.productsRepository.count();
+    const pages = Math.ceil(totalProducts / size);
+
+    return { products, pages };
   }
 
   public async findById(id: string): Promise<Product | null> {
@@ -70,8 +76,16 @@ class ProductsService implements IService {
   public async search(
     payload: Partial<Product>,
     query: PaginatedQuery,
-  ): Promise<Product[]> {
-    return this.productsRepository.search(payload, query);
+  ): Promise<GetProductsResponseDto> {
+    const { size } = query;
+    const products = await this.productsRepository.search(payload, query);
+    const totalProducts = await this.productsRepository.search(payload, {
+      page: 0,
+      size: await this.productsRepository.count(),
+    });
+    const pages = Math.ceil(totalProducts.length / size);
+
+    return { products, pages };
   }
 
   private async validateFiles(files: string[]): Promise<void> {
