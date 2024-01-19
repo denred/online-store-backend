@@ -6,7 +6,10 @@ import { HttpCode, HttpMessage } from '~/libs/packages/http/http.js';
 import { type PaginatedQuery } from '~/libs/types/types.js';
 
 import { type FilesService } from '../files/files.js';
-import { ProductValidationRules } from './libs/enums/product-validation-rules.enum.js';
+import {
+  ProductSubcategory,
+  ProductValidationRules,
+} from './libs/enums/enums.js';
 import { getBuildId, getBuildImageName } from './libs/helpers/helpers.js';
 import {
   type CreateProductDto,
@@ -27,6 +30,10 @@ class ProductsService implements IService {
   ) {
     this.productsRepository = productsRepository;
     this.filesService = filesService;
+  }
+
+  public updateProductQuantity(id: string, quantity: number): Promise<Product> {
+    return this.productsRepository.update(id, { quantity });
   }
 
   public async findAll(query: PaginatedQuery): Promise<GetProductsResponseDto> {
@@ -51,19 +58,19 @@ class ProductsService implements IService {
 
     await this.validateFiles(files);
 
-    return await this.productsRepository.create(payload);
+    return this.productsRepository.create(payload);
   }
 
   public async update(id: string, payload: Partial<Product>): Promise<Product> {
-    await this.isProductExist(id);
+    await this.getProductOrThrowError(id);
 
-    return await this.productsRepository.update(id, payload);
+    return this.productsRepository.update(id, payload);
   }
 
   public async delete(id: string): Promise<boolean> {
-    await this.isProductExist(id);
+    await this.getProductOrThrowError(id);
 
-    return await this.productsRepository.delete(id);
+    return this.productsRepository.delete(id);
   }
 
   public async search(
@@ -93,25 +100,22 @@ class ProductsService implements IService {
 
     if (!isValidPrismaId) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
         message: HttpMessage.INVALID_ID,
       });
     }
   }
 
-  private async isProductExist(id: string): Promise<boolean> {
-    this.isValidPrismaId(id);
-
+  private async getProductOrThrowError(id: string): Promise<Product> {
     const product = await this.findById(id);
 
     if (!product) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
+        status: HttpCode.NOT_FOUND,
         message: HttpMessage.PRODUCT_DOES_NOT_EXIST,
       });
     }
 
-    return true;
+    return product;
   }
 
   public async getTopCategories(): Promise<TopCategory[]> {
@@ -136,7 +140,7 @@ class ProductsService implements IService {
         if (title && imageUrl) {
           topCategories.push({
             id: getBuildId(title),
-            name: subcategory,
+            name: ProductSubcategory[subcategory],
             url: imageUrl,
           });
         }
