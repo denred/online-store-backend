@@ -6,10 +6,14 @@ import { HttpCode, HttpMessage } from '~/libs/packages/http/http.js';
 import { type PaginatedQuery } from '~/libs/types/types.js';
 
 import { type FilesService } from '../files/files.js';
-import { ProductValidationRules } from './libs/enums/product-validation-rules.enum.js';
+import {
+  ProductSubcategory,
+  ProductValidationRules,
+} from './libs/enums/enums.js';
 import { getBuildId, getBuildImageName } from './libs/helpers/helpers.js';
 import {
   type CreateProductDto,
+  type GetProductsResponseDto,
   type ImageUrl,
   type TopCategory,
 } from './libs/types/types.js';
@@ -28,8 +32,17 @@ class ProductsService implements IService {
     this.filesService = filesService;
   }
 
-  public async findAll(query: PaginatedQuery): Promise<Product[]> {
-    return this.productsRepository.findAll(query);
+  public updateProductQuantity(id: string, quantity: number): Promise<Product> {
+    return this.productsRepository.update(id, { quantity });
+  }
+
+  public async findAll(query: PaginatedQuery): Promise<GetProductsResponseDto> {
+    const { size } = query;
+    const products = await this.productsRepository.findAll(query);
+    const totalProducts = await this.productsRepository.count();
+    const pages = Math.ceil(totalProducts / size);
+
+    return { products, pages };
   }
 
   public async findById(id: string): Promise<Product | null> {
@@ -61,13 +74,13 @@ class ProductsService implements IService {
   }
 
   public async update(id: string, payload: Partial<Product>): Promise<Product> {
-    await this.isProductExist(id);
+    await this.getProductOrThrowError(id);
 
     return this.productsRepository.update(id, payload);
   }
 
   public async delete(id: string): Promise<boolean> {
-    await this.isProductExist(id);
+    await this.getProductOrThrowError(id);
 
     return this.productsRepository.delete(id);
   }
@@ -75,8 +88,16 @@ class ProductsService implements IService {
   public async search(
     payload: Partial<Product>,
     query: PaginatedQuery,
-  ): Promise<Product[]> {
-    return this.productsRepository.search(payload, query);
+  ): Promise<GetProductsResponseDto> {
+    const { size } = query;
+    const products = await this.productsRepository.search(payload, query);
+    const totalProducts = await this.productsRepository.search(payload, {
+      page: 0,
+      size: await this.productsRepository.count(),
+    });
+    const pages = Math.ceil(totalProducts.length / size);
+
+    return { products, pages };
   }
 
   private async validateFiles(files: string[]): Promise<void> {
@@ -91,25 +112,22 @@ class ProductsService implements IService {
 
     if (!isValidPrismaId) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
         message: HttpMessage.INVALID_ID,
       });
     }
   }
 
-  private async isProductExist(id: string): Promise<boolean> {
-    this.isValidPrismaId(id);
-
+  private async getProductOrThrowError(id: string): Promise<Product> {
     const product = await this.findById(id);
 
     if (!product) {
       throw new HttpError({
-        status: HttpCode.BAD_REQUEST,
+        status: HttpCode.NOT_FOUND,
         message: HttpMessage.PRODUCT_DOES_NOT_EXIST,
       });
     }
 
-    return true;
+    return product;
   }
 
   public async getTopCategories(): Promise<TopCategory[]> {
@@ -134,7 +152,7 @@ class ProductsService implements IService {
         if (title && imageUrl) {
           topCategories.push({
             id: getBuildId(title),
-            name: subcategory,
+            name: ProductSubcategory[subcategory],
             url: imageUrl,
           });
         }

@@ -5,46 +5,15 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../ERD.svg"
+  disabled = true
+}
+
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
-}
-
-model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  firstName String?
-  lastName  String?
-  email     String
-  hash      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-}
-
-model Product {
-  id           String      @id @default(auto()) @map("_id") @db.ObjectId
-  vendorCode   Int?        @unique
-  category     Category
-  subcategory  Subcategory
-  title        String
-  colour       Colour
-  description  String
-  composition  String
-  size         Size[]
-  price        Float
-  brand        String?
-  collection   String?
-  manufacturer String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @default(now()) @updatedAt
-  files        String[]
-}
-
-model Review {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  text   String
-  rating Float
-
-  productId String @unique @db.ObjectId
 }
 
 enum Size {
@@ -65,6 +34,7 @@ enum Subcategory {
   JACKETS
   COATS
   TRENCH
+  FIELD_JACKETS
   GILETS
   OVERSHIRTS
   SWEATERS
@@ -77,6 +47,62 @@ enum Colour {
   BLACK
 }
 
+enum UserStatus {
+  ANONYMOUS
+  ACTIVE
+  BLOCKED
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  firstName String
+  lastName  String
+  phone     String     @unique
+  email     String     @unique
+  hash      String?
+  salt      String?
+  addresses Address[]
+  orders    Order[]
+  status    UserStatus @default(ANONYMOUS)
+  role      UserRole   @default(USER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+}
+
+model Product {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  vendorCode   Int?        @unique
+  category     Category
+  subcategory  Subcategory
+  title        String
+  colour       Colour
+  description  String
+  composition  String
+  size         Size[]
+  price        Float
+  brand        String?
+  collection   String?
+  manufacturer String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now()) @updatedAt
+  files        String[]
+  quantity     Int
+
+  OrderItem OrderItem[]
+}
+
+model Review {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  text      String
+  rating    Float
+  productId String @unique @db.ObjectId
+}
+
 model File {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   key         String   @unique
@@ -86,12 +112,47 @@ model File {
   updatedAt   DateTime @default(now()) @updatedAt
 }
 
-model Subscription {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  email     String  @unique
-  firstName String?
-  lastName  String?
+model Address {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  address   String
+  moreInfo  String?
+  zipCode   String
+  city      String
+  state     String
+  country   String
+  userId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Order {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String      @db.ObjectId
+  totalPrice Float
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now()) @updatedAt
+  orderItems OrderItem[]
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model OrderItem {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String @db.ObjectId
+  productId String @db.ObjectId
+  quantity  Int
+
+  Order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Subscription {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  email       String       @unique
+  firstName   String?
+  lastName    String?
   preferences Preferences?
 }
 
