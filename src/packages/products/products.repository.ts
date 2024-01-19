@@ -65,6 +65,15 @@ class ProductsRepository implements IRepository {
   public async delete(id: string): Promise<boolean> {
     return !!(await this.db.product.delete({ where: { id } }));
   }
+
+  public async getMaxVendorCode(): Promise<number | null> {
+    const lastProduct = await this.db.product.findFirst({
+      select: { vendorCode: true },
+      orderBy: { vendorCode: 'desc' },
+    });
+
+    return lastProduct?.vendorCode ?? null;
+  }
 }
 
 export { ProductsRepository };

@@ -31,6 +31,8 @@ import { type ProductsService } from './products.service.js';
  *       properties:
  *         id:
  *           type: string
+ *         vendorCode:
+ *           type: number
  *         category:
  *           $ref: '#/components/schemas/Category'
  *         subcategory:
