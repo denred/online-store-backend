@@ -1,7 +1,7 @@
 import { type Colour, type Size } from '@prisma/client';
 
 type GetFilteredProductRequestDto = {
-  colures?: Colour[];
+  colours?: Colour[];
   sizes?: Size[];
   priceRange?: { min: number; max: number };
 };

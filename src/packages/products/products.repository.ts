@@ -55,18 +55,18 @@ class ProductsRepository implements IRepository {
     payload: GetFilteredProductRequestDto,
     query: PaginatedQuery,
   ): Promise<Product[]> {
-    const { colures, sizes, priceRange } = payload;
+    const { colours, sizes, priceRange } = payload;
     const { sorting } = query;
 
     const whereClause: Prisma.ProductWhereInput = {
-      ...(colures && { colour: { in: colures } }),
+      ...(colours && { colour: { in: colours } }),
       ...(sizes && { size: { hasSome: sizes } }),
       ...(priceRange && {
         price: { gte: priceRange.min, lte: priceRange.max },
       }),
     };
 
-    return await this.db.product.findMany({
+    return this.db.product.findMany({
       skip: getSkip(query),
       take: getTake(query, await this.count()),
       where: whereClause,

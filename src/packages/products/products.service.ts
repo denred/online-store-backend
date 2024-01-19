@@ -117,7 +117,7 @@ class ProductsService implements IService {
         size: await this.productsRepository.count(),
       });
 
-    const pages = totalProducts.length / size;
+    const pages = Math.ceil(totalProducts.length / size);
 
     return { products, pages };
   }

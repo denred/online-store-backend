@@ -82,21 +82,10 @@ import { type ProductsService } from './products.service.js';
  *           type: number
  *           example: 30
  *
- *     GetProductsResponseDto:
- *       type: object
- *       properties:
- *         products:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Product'
- *         total:
- *           type: number
- *           example: 30
- *
  *     GetFilteredProductRequestDto:
  *       type: object
  *       properties:
- *         colures:
+ *         colours:
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/Colour'

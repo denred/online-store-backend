@@ -6,7 +6,7 @@ const getSortedAndFilteredProductsSchema = Joi.object<
   GetFilteredProductRequestDto,
   true
 >({
-  colures: Joi.array().items(Joi.string()),
+  colours: Joi.array().items(Joi.string()),
   sizes: Joi.array().items(Joi.string()),
   priceRange: Joi.object({
     min: Joi.number().integer().min(0),
