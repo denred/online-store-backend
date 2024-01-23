@@ -10,16 +10,20 @@ import {
 import { type AuthService } from './auth.service.js';
 import { AuthApiPath } from './libs/enums/enums.js';
 import {
+  type UserSignInRequestDTO,
+  type UserSignResponseWithToken,
   type UserSignUpRequestDTO,
-  type UserSignUpResponseDTO,
 } from './libs/types/types.js';
-import { userSignUpSchema } from './libs/validations/validations.js';
+import {
+  userSignInSchema,
+  userSignUpSchema,
+} from './libs/validations/validations.js';
 
 /**
  * @swagger
  * components:
  *    schemas:
- *      CreateUserRequest:
+ *      SignUpUserRequest:
  *        type: object
  *        properties:
  *          phone:
@@ -48,7 +52,22 @@ import { userSignUpSchema } from './libs/validations/validations.js';
  *            pattern: ^(?=.*[a-z])(?=.*\\d)[\\dA-Za-z]{6,20}$
  *            description: Must be 6+ characters, at least 1 letter and 1 number
  *
- *      CreateUserResponse:
+ *      SignInRequestBody:
+ *        type: object
+ *        properties:
+ *          email:
+ *            type: string
+ *            format: email
+ *            maxLength: 80
+ *            description: Email must be a valid email address
+ *          password:
+ *            type: string
+ *            minimum: 6
+ *            maximum: 20
+ *            pattern: ^(?=.*[a-z])(?=.*\\d)[\\dA-Za-z]{6,20}$
+ *            description: Must be 6+ characters, at least 1 letter and 1 number
+ *
+ *      SignInSignUpUserResponse:
  *         type: object
  *         properties:
  *           firstName:
@@ -69,6 +88,8 @@ import { userSignUpSchema } from './libs/validations/validations.js';
  *           updatedAt:
  *             type: string
  *             format: date-time
+ *           token:
+ *             type: string
  *
  *      UserRole:
  *        type: string
@@ -97,6 +118,20 @@ class AuthController extends Controller {
           }>,
         ),
     });
+
+    this.addRoute({
+      path: AuthApiPath.SIGN_IN,
+      method: 'POST',
+      validation: {
+        body: userSignInSchema,
+      },
+      handler: (options) =>
+        this.signin(
+          options as ApiHandlerOptions<{
+            body: UserSignInRequestDTO;
+          }>,
+        ),
+    });
   }
 
   /**
@@ -110,7 +145,7 @@ class AuthController extends Controller {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: '#/components/schemas/CreateUserRequest'
+   *             $ref: '#/components/schemas/SignUpUserRequest'
    *       description: User auth data
    *       required: true
    *     responses:
@@ -119,7 +154,7 @@ class AuthController extends Controller {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/CreateUserResponse'
+   *               $ref: '#/components/schemas/SignInSignUpUserResponse'
    *       409:
    *         description: User already exists
    *         content:
@@ -138,10 +173,56 @@ class AuthController extends Controller {
     options: ApiHandlerOptions<{
       body: UserSignUpRequestDTO;
     }>,
-  ): Promise<ApiHandlerResponse<UserSignUpResponseDTO>> {
+  ): Promise<ApiHandlerResponse<UserSignResponseWithToken>> {
     return {
       status: HttpCode.CREATED,
       payload: await this.authService.signup(options.body),
+    };
+  }
+
+  /**
+   * @swagger
+   * /auth/sign-in/:
+   *   post:
+   *     tags:
+   *       - Auth API
+   *     description: Sign in user into the app
+   *     requestBody:
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/SignInRequestBody'
+   *       description: User auth data
+   *       required: true
+   *     responses:
+   *       200:
+   *         description: Successful operation
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/SignInSignUpUserResponse'
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errorType:
+   *                   type: string
+   *                   example: COMMON
+   *                 message:
+   *                   type: string
+   *                   example: This email is not registered
+   */
+  private async signin(
+    options: ApiHandlerOptions<{
+      body: UserSignInRequestDTO;
+    }>,
+  ): Promise<ApiHandlerResponse<UserSignResponseWithToken>> {
+    return {
+      status: HttpCode.OK,
+      payload: await this.authService.signin(options.body),
     };
   }
 }

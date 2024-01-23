@@ -127,6 +127,26 @@ class Config implements IConfig<EnvironmentSchema> {
           default: null,
         },
       },
+      JWT: {
+        SECRET: {
+          doc: 'Secret key for token generation',
+          format: String,
+          env: 'JWT_SECRET',
+          default: null,
+        },
+        ISSUER: {
+          doc: 'Issuer of token processing',
+          format: String,
+          env: 'JWT_ISSUER',
+          default: null,
+        },
+        EXP_TIME: {
+          doc: 'Jwt key expiration time',
+          format: String,
+          env: 'JWT_EXP_TIME',
+          default: '24h',
+        },
+      },
     });
   }
 }
