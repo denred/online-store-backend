@@ -25,7 +25,7 @@ class UsersRepository implements IRepository {
     email?: User['email'];
     phone?: User['phone'];
   }): Promise<User | null> {
-    return await this.db.user.findFirst({
+    return this.db.user.findFirst({
       where: {
         OR: [
           {
@@ -42,7 +42,7 @@ class UsersRepository implements IRepository {
   public async create(payload: CreateUserDTO): Promise<User> {
     const { addresses, ...user } = payload;
 
-    return await this.db.user.create({
+    return this.db.user.create({
       data: {
         ...user,
         addresses: addresses && { createMany: { data: addresses } },
@@ -69,7 +69,7 @@ class UsersRepository implements IRepository {
         }),
     };
 
-    return await this.db.user.update({
+    return this.db.user.update({
       where: { id },
       data: updateData,
     });

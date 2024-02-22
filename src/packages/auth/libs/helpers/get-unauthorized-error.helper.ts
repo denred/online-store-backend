@@ -11,7 +11,7 @@ const getUnauthorizedError = ({
   throw new HttpError({
     message: message ?? HttpMessage.UNAUTHORIZED,
     status: HttpCode.UNAUTHORIZED,
-    cause: cause,
+    cause,
   });
 };
 

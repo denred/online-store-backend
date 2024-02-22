@@ -48,7 +48,7 @@ class FilesService implements IService {
       });
     }
 
-    return await this.s3Bucket.getObjectPresignedUrl(fileRecord.key);
+    return this.s3Bucket.getObjectPresignedUrl(fileRecord.key);
   }
 
   public async createMany(

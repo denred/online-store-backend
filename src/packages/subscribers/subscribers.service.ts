@@ -46,7 +46,7 @@ class SubscribersService {
   public async unsubscribe(payload: SubscriptionBody): Promise<boolean> {
     const { email } = payload;
 
-    return await this.subscribersRepository.unsubscribe(email);
+    return this.subscribersRepository.unsubscribe(email);
   }
 
   public async getStatus(
@@ -77,7 +77,7 @@ class SubscribersService {
 
     const { id } = subscription.preferences;
 
-    return await this.subscribersRepository.setPreferences(id, preferences);
+    return this.subscribersRepository.setPreferences(id, preferences);
   }
 }
 
