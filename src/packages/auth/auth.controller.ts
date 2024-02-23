@@ -10,11 +10,13 @@ import {
 import { type AuthService } from './auth.service.js';
 import { AuthApiPath } from './libs/enums/enums.js';
 import {
+  GooglePayload,
   type UserSignInRequestDTO,
   type UserSignResponseWithToken,
   type UserSignUpRequestDTO,
 } from './libs/types/types.js';
 import {
+  loginWithGoogleSchema,
   userSignInSchema,
   userSignUpSchema,
 } from './libs/validations/validations.js';
@@ -97,6 +99,12 @@ import {
  *          - ADMIN
  *          - USER
  *
+ *      GooglePayload:
+ *        type: object
+ *        properties:
+ *          code:
+ *            type: string
+ *
  */
 class AuthController extends Controller {
   private authService: AuthService;
@@ -131,6 +139,21 @@ class AuthController extends Controller {
             body: UserSignInRequestDTO;
           }>,
         ),
+    });
+
+    this.addRoute({
+      path: AuthApiPath.GOOGLE,
+      method: 'POST',
+      validation: {
+        body: loginWithGoogleSchema,
+      },
+      handler: (options) => {
+        return this.loginWithGoogle(
+          options as ApiHandlerOptions<{
+            body: GooglePayload;
+          }>,
+        );
+      },
     });
   }
 
@@ -223,6 +246,68 @@ class AuthController extends Controller {
     return {
       status: HttpCode.OK,
       payload: await this.authService.signin(options.body),
+    };
+  }
+
+  /**
+   * @swagger
+   * /auth/google/:
+   *   post:
+   *     tags:
+   *       - Auth API
+   *     description: Login with Google
+   *     requestBody:
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/GooglePayload'
+   *       description: Google authentication code
+   *       required: true
+   *     responses:
+   *       200:
+   *         description: Successful operation
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/SignInSignUpUserResponse'
+   *       400:
+   *         description: Bad Request
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errorType:
+   *                   type: string
+   *                   example: COMMON
+   *                 message:
+   *                   type: string
+   *                   example: Invalid Google authentication code
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errorType:
+   *                   type: string
+   *                   example: COMMON
+   *                 message:
+   *                   type: string
+   *                   example: Unauthorized Google login
+   */
+
+  private async loginWithGoogle(
+    options: ApiHandlerOptions<{
+      body: GooglePayload;
+    }>,
+  ): Promise<ApiHandlerResponse> {
+    const { code } = options.body;
+
+    return {
+      status: HttpCode.OK,
+      payload: await this.authService.loginWithGoogle(code),
     };
   }
 }

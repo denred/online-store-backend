@@ -26,6 +26,11 @@ type EnvironmentSchema = {
     ISSUER: string;
     EXP_TIME: string;
   };
+  GOOGLE_AUTH: {
+    CLIENT_ID: string;
+    CLIENT_SECRET: string;
+    REDIRECT_URI: string;
+  };
 };
 
 export { type EnvironmentSchema };

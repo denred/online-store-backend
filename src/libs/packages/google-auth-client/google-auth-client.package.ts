@@ -4,14 +4,13 @@ import {
   OAuth2Client,
   type TokenPayload,
 } from 'google-auth-library';
-
 import { HttpError } from '~/libs/exceptions/exceptions.js';
-
 import { HttpMessage } from '../http/http.js';
 
 type Constructor = {
   clientId: string;
   clientSecret: string;
+  redirectUri: string;
 };
 
 class GoogleAuthClient {
@@ -19,19 +18,18 @@ class GoogleAuthClient {
 
   private clientId: string;
 
-  public constructor({ clientId, clientSecret }: Constructor) {
+  public constructor({ clientId, clientSecret, redirectUri }: Constructor) {
     this.clientId = clientId;
-    this.authClient = new OAuth2Client(clientId, clientSecret);
+    this.authClient = new OAuth2Client(clientId, clientSecret, redirectUri);
   }
 
   private async getTokens(code: string): Promise<Credentials> {
     const { tokens } = await this.authClient.getToken(code);
-
     return tokens;
   }
 
   private async verify(token: string): Promise<LoginTicket> {
-    return await this.authClient.verifyIdToken({
+    return this.authClient.verifyIdToken({
       idToken: token,
       audience: this.clientId,
     });

@@ -1,6 +1,9 @@
 import { HttpError } from '~/libs/exceptions/exceptions.js';
 import { HttpCode, HttpMessage } from '~/libs/packages/http/http.js';
-import { type IJwtService } from '~/libs/packages/packages.js';
+import {
+  type IJwtService,
+  type GoogleAuthClient,
+} from '~/libs/packages/packages.js';
 
 import { type UsersService } from '../users/users.service.js';
 import { getUnauthorizedError } from './libs/helpers/helpers.js';
@@ -15,9 +18,16 @@ class AuthService {
 
   private jwtService: IJwtService;
 
-  public constructor(usersService: UsersService, jwtService: IJwtService) {
+  private googleAuthClient: GoogleAuthClient;
+
+  public constructor(
+    usersService: UsersService,
+    jwtService: IJwtService,
+    googleAuthClient: GoogleAuthClient,
+  ) {
     this.usersService = usersService;
     this.jwtService = jwtService;
+    this.googleAuthClient = googleAuthClient;
   }
 
   public async signup(
@@ -79,9 +89,38 @@ class AuthService {
       throw getUnauthorizedError({ message: HttpMessage.WRONG_PASSWORD });
     }
 
-    const token = await this.jwtService.sign({ id: user.id });
+    const { id, hash, salt, ...filteredUser } = user;
+    const token = await this.jwtService.sign({ id });
 
-    return { ...user, token };
+    return { ...filteredUser, id, token };
+  }
+
+  public async loginWithGoogle(
+    code: string,
+  ): Promise<UserSignResponseWithToken> {
+    const userInfo = await this.googleAuthClient.getUserInfo(code);
+
+    if (!userInfo) {
+      throw new HttpError({ message: HttpMessage.INVALID_CODE });
+    }
+
+    const { email } = userInfo;
+
+    if (!email) {
+      throw new HttpError({
+        message: HttpMessage.INVALID_USER_INFO_NO_EMAIL,
+      });
+    }
+
+    let user = await this.usersService.findUserByEmailOrPhone({ email });
+
+    if (!user) {
+      user = await this.usersService.createUserFromGoogleInfo(userInfo);
+    }
+    const { id, hash, salt, ...filteredUser } = user;
+    const token = await this.jwtService.sign({ id });
+
+    return { ...filteredUser, id, token };
   }
 }
 
