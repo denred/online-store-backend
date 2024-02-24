@@ -56,22 +56,9 @@ class ProductsService implements IService {
 
   public async create(payload: CreateProductDto): Promise<Product> {
     const { files } = payload;
-
     await this.validateFiles(files);
-    const vendorCode = await this.generateVendorCode();
 
-    return this.productsRepository.create({
-      ...payload,
-      vendorCode,
-    });
-  }
-
-  private async generateVendorCode(): Promise<number> {
-    const MAX_VENDOR_CODE = 100_000;
-    const maxVendorCode =
-      (await this.productsRepository.getMaxVendorCode()) ?? MAX_VENDOR_CODE;
-
-    return maxVendorCode + 1;
+    return this.productsRepository.create(payload);
   }
 
   public async update(id: string, payload: Partial<Product>): Promise<Product> {

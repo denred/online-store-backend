@@ -114,6 +114,9 @@ import { type ProductsService } from './products.service.js';
  *         title:
  *           type: string
  *           example: 'Suede-effect bomber jacket'
+ *         vendorCode:
+ *           type: number
+ *           example: '100001b'
  *         colour:
  *           $ref: '#/components/schemas/Colour'
  *         description:
