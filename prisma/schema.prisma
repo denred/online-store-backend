@@ -91,6 +91,7 @@ model Product {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @default(now()) @updatedAt
   files        String[]
+  quantities   Json?
   quantity     Int
 
   OrderItem OrderItem[]
