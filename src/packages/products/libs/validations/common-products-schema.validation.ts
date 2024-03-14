@@ -17,6 +17,10 @@ const commonProductsSchema = {
     .trim()
     .max(ProductValidationRules.MAX_LENGTH)
     .messages({}),
+  vendorCode: Joi.string()
+    .trim()
+    .max(ProductValidationRules.MAX_LENGTH)
+    .messages(getErrorMessages()),
   colour: Joi.string()
     .valid(...Object.values(Colour))
     .messages(getErrorMessages()),

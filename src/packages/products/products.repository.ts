@@ -1,11 +1,9 @@
 import { type Prisma, type PrismaClient, type Product } from '@prisma/client';
-
-import { ProductSortParameter } from '~/libs/enums/product-sort-parameter.enum.js';
 import { type IRepository } from '~/libs/interfaces/interfaces.js';
 import { type PaginatedQuery } from '~/libs/types/types.js';
-
-import { getSkip, getTake } from './libs/helpers/helpers.js';
 import { type GetFilteredProductRequestDto } from './libs/types/types.js';
+import { ProductSortParameter } from '~/libs/enums/product-sort-parameter.enum.js';
+import { getSkip, getTake } from './libs/helpers/helpers.js';
 
 class ProductsRepository implements IRepository {
   private db: Pick<PrismaClient, 'product'>;
@@ -92,15 +90,6 @@ class ProductsRepository implements IRepository {
 
   public async delete(id: string): Promise<boolean> {
     return !!(await this.db.product.delete({ where: { id } }));
-  }
-
-  public async getMaxVendorCode(): Promise<number | null> {
-    const lastProduct = await this.db.product.findFirst({
-      select: { vendorCode: true },
-      orderBy: { vendorCode: 'desc' },
-    });
-
-    return lastProduct?.vendorCode ?? null;
   }
 }
 
