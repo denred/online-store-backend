@@ -147,6 +147,46 @@ class Config implements IConfig<EnvironmentSchema> {
           default: '24h',
         },
       },
+      GOOGLE_AUTH: {
+        CLIENT_ID: {
+          doc: 'Google Auth api client id',
+          format: String,
+          env: 'GOOGLE_CLIENT_ID',
+          default: null,
+        },
+        CLIENT_SECRET: {
+          doc: 'Google Auth api client secret',
+          format: String,
+          env: 'GOOGLE_CLIENT_SECRET',
+          default: null,
+        },
+        REDIRECT_URI: {
+          doc: 'Authorized redirect URIs',
+          format: String,
+          env: 'GOOGLE_REDIRECT_URI',
+          default: null,
+        },
+      },
+      FB: {
+        APP_ID: {
+          doc: 'Application ID',
+          format: String,
+          env: 'FACEBOOK_APP_ID',
+          default: null,
+        },
+        APP_SECRET: {
+          doc: 'Secret key for token generation',
+          format: String,
+          env: 'FACEBOOK_APP_SECRET',
+          default: null,
+        },
+        BASE_URL: {
+          doc: 'Base URL for Facebook Graph API',
+          format: String,
+          env: 'FACEBOOK_BASE_URL',
+          default: 'https://graph.facebook.com',
+        },
+      },
     });
   }
 }
