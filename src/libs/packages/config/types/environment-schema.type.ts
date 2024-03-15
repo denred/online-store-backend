@@ -31,6 +31,11 @@ type EnvironmentSchema = {
     CLIENT_SECRET: string;
     REDIRECT_URI: string;
   };
+  FB: {
+    APP_ID: string;
+    APP_SECRET: string;
+    BASE_URL: string;
+  };
 };
 
 export { type EnvironmentSchema };

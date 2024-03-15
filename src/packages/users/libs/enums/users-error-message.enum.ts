@@ -6,6 +6,7 @@ const UsersErrorMessage = {
   PHONE_INVALID: 'Phone must be in international format, starting with "+"',
   PASSWORD_INVALID: `Password must contain at least 1 letter, 1 digit, and be from ${PasswordLimits.MIN_LENGTH} to ${PasswordLimits.MAX_LENGTH} characters long.`,
   INVALID_GOOGLE_DATA: 'Invalid data received from Google API',
+  INVALID_FACEBOOK_DATA: 'Invalid data received from Facebook API',
 } as const;
 
 export { UsersErrorMessage };

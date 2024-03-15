@@ -6,3 +6,4 @@ export { type UserSignResponseDTO } from './user-sign-response-dto.type.js';
 export { type UserSignResponseWithToken } from './user-sign-response-with-token.type.js';
 export { type UserSignUpRequestDTO } from './user-sign-up-request-dto.type.js';
 export { type GooglePayload } from './google-payload.type.js';
+export { type SignInWIthFacebook } from './sign-in-with-facebook.type.js';

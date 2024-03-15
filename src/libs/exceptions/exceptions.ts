@@ -5,3 +5,4 @@ export { HttpError } from './http-error.exception.js';
 export { InvalidFileError } from './invalid-file-error.exception.js';
 export { MailerConnectionError } from './mail-connection-error.exception.js';
 export { throwError } from './utils/utils.js';
+export { UnauthorizedError } from './unauthorized-error.exception.js';

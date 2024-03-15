@@ -1,5 +1,5 @@
 type ErrorConstructor = {
-  message: string;
+  message?: string;
   cause?: unknown;
 };
 
