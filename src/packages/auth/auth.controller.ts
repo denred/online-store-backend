@@ -11,12 +11,14 @@ import { type AuthService } from './auth.service.js';
 import { AuthApiPath } from './libs/enums/enums.js';
 import {
   GooglePayload,
+  SignInWIthFacebook,
   type UserSignInRequestDTO,
   type UserSignResponseWithToken,
   type UserSignUpRequestDTO,
 } from './libs/types/types.js';
 import {
   loginWithGoogleSchema,
+  loginWithFacebookSchema,
   userSignInSchema,
   userSignUpSchema,
 } from './libs/validations/validations.js';
@@ -93,6 +95,18 @@ import {
  *           token:
  *             type: string
  *
+ *      SignInWithFacebook:
+ *        type: object
+ *        properties:
+ *          accessToken:
+ *            type: string
+ *          firstName:
+ *            type: string
+ *          lastName:
+ *            type: string
+ *          email:
+ *            type: string
+ *
  *      UserRole:
  *        type: string
  *        enum:
@@ -154,6 +168,20 @@ class AuthController extends Controller {
           }>,
         );
       },
+    });
+
+    this.addRoute({
+      path: AuthApiPath.FACEBOOK,
+      method: 'POST',
+      validation: {
+        body: loginWithFacebookSchema,
+      },
+      handler: (options) =>
+        this.signInWithFacebook(
+          options as ApiHandlerOptions<{
+            body: SignInWIthFacebook;
+          }>,
+        ),
     });
   }
 
@@ -308,6 +336,59 @@ class AuthController extends Controller {
     return {
       status: HttpCode.OK,
       payload: await this.authService.loginWithGoogle(code),
+    };
+  }
+
+  /**
+   * @swagger
+   * /auth/facebook/:
+   *   post:
+   *     tags:
+   *       - Auth API
+   *     description: Sign in with Facebook
+   *     requestBody:
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/SignInWithFacebook'
+   *     responses:
+   *       200:
+   *         description: Successful operation
+   *       400:
+   *         description: Bad Request
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errorType:
+   *                   type: string
+   *                   example: COMMON
+   *                 message:
+   *                   type: string
+   *                   example: Invalid Facebook authentication data
+   *       401:
+   *         description: Unauthorized
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 errorType:
+   *                   type: string
+   *                   example: COMMON
+   *                 message:
+   *                   type: string
+   *                   example: Unauthorized Facebook login
+   */
+  private async signInWithFacebook(
+    options: ApiHandlerOptions<{
+      body: SignInWIthFacebook;
+    }>,
+  ): Promise<ApiHandlerResponse> {
+    return {
+      status: HttpCode.OK,
+      payload: await this.authService.signInWithFacebook(options.body),
     };
   }
 }

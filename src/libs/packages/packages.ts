@@ -18,3 +18,7 @@ export {
   type GoogleAuthClient,
   googleAuthClient,
 } from './google-auth-client/google-auth-client.js';
+export {
+  type IFacebookAuth,
+  facebookAuth,
+} from './facebook-auth/facebook-auth.js';

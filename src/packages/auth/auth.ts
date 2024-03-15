@@ -2,12 +2,19 @@ import {
   jwtService,
   logger,
   googleAuthClient,
+  facebookAuth,
 } from '~/libs/packages/packages.js';
+
 import { usersService } from '../users/users.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 
-const authService = new AuthService(usersService, jwtService, googleAuthClient);
+const authService = new AuthService({
+  usersService,
+  jwtService,
+  facebookAuth,
+  googleAuthClient,
+});
 const authController = new AuthController(logger, authService);
 
 export { authController };

@@ -11,6 +11,7 @@ const HttpMessage = {
   INVALID_GOOGLE_TOKEN: 'Failed to obtain valid tokens.',
   INVALID_CODE: 'Invalid code.',
   INVALID_USER_INFO_NO_EMAIL: 'Invalid user info format: no email.',
+  INVALID_ACCESS_TOKEN: 'Facebook token is invalid',
 } as const;
 
 export { HttpMessage };

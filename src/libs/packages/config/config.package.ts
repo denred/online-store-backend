@@ -167,6 +167,26 @@ class Config implements IConfig<EnvironmentSchema> {
           default: null,
         },
       },
+      FB: {
+        APP_ID: {
+          doc: 'Application ID',
+          format: String,
+          env: 'FACEBOOK_APP_ID',
+          default: null,
+        },
+        APP_SECRET: {
+          doc: 'Secret key for token generation',
+          format: String,
+          env: 'FACEBOOK_APP_SECRET',
+          default: null,
+        },
+        BASE_URL: {
+          doc: 'Base URL for Facebook Graph API',
+          format: String,
+          env: 'FACEBOOK_BASE_URL',
+          default: 'https://graph.facebook.com',
+        },
+      },
     });
   }
 }
