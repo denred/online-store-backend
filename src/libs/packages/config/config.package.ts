@@ -147,6 +147,26 @@ class Config implements IConfig<EnvironmentSchema> {
           default: '24h',
         },
       },
+      GOOGLE_AUTH: {
+        CLIENT_ID: {
+          doc: 'Google Auth api client id',
+          format: String,
+          env: 'GOOGLE_CLIENT_ID',
+          default: null,
+        },
+        CLIENT_SECRET: {
+          doc: 'Google Auth api client secret',
+          format: String,
+          env: 'GOOGLE_CLIENT_SECRET',
+          default: null,
+        },
+        REDIRECT_URI: {
+          doc: 'Authorized redirect URIs',
+          format: String,
+          env: 'GOOGLE_REDIRECT_URI',
+          default: null,
+        },
+      },
     });
   }
 }

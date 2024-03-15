@@ -14,3 +14,7 @@ export { HttpCode, HttpHeader, HttpMessage } from './http/http.js';
 export { type IJwtService, jwtService } from './jwt/jwt.js';
 export { type ILogger, logger } from './logger/logger.js';
 export { type IView, View } from './view/view.js';
+export {
+  type GoogleAuthClient,
+  googleAuthClient,
+} from './google-auth-client/google-auth-client.js';

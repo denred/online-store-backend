@@ -9,7 +9,11 @@ import {
   type UserSignUpRequestDTO,
 } from '../auth/libs/types/types.js';
 import { UsersErrorMessage } from './libs/enums/enums.js';
-import { type CreateUserDTO, type UpdateUserDTO } from './libs/types/types.js';
+import {
+  type TokenPayload,
+  type CreateUserDTO,
+  type UpdateUserDTO,
+} from './libs/types/types.js';
 import { type UsersRepository } from './users.repository.js';
 
 class UsersService implements IService {
@@ -105,6 +109,31 @@ class UsersService implements IService {
 
   public async delete(id: string): Promise<boolean> {
     return this.usersRepository.delete(id);
+  }
+
+  public async createUserFromGoogleInfo(
+    googleUserInfo: TokenPayload,
+  ): Promise<User> {
+    const {
+      email = '',
+      given_name: firstName = '',
+      family_name: lastName = '',
+    } = googleUserInfo;
+
+    if (!email || !firstName || !lastName) {
+      throwError(UsersErrorMessage.INVALID_GOOGLE_DATA, HttpCode.BAD_REQUEST);
+    }
+
+    return this.usersRepository.create({
+      phone: null,
+      hash: null,
+      salt: null,
+      email,
+      firstName,
+      lastName,
+      status: UserStatus.ACTIVE,
+      role: UserRole.USER,
+    });
   }
 }
 

@@ -62,7 +62,7 @@ model User {
   id        String     @id @default(auto()) @map("_id") @db.ObjectId
   firstName String
   lastName  String
-  phone     String     @unique
+  phone     String?    @unique
   email     String     @unique
   hash      String?
   salt      String?
