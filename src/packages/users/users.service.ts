@@ -92,15 +92,6 @@ class UsersService implements IService {
       throwError(UsersErrorMessage.NOT_FOUND, HttpCode.NOT_FOUND);
     }
 
-    const userWithSameEmailOrPhone = await this.findUserByEmailOrPhone({
-      email,
-      phone,
-    });
-
-    if (userWithSameEmailOrPhone && userWithSameEmailOrPhone.id !== id) {
-      throwError(UsersErrorMessage.ALREADY_EXISTS, HttpCode.FORBIDDEN);
-    }
-
     return this.usersRepository.update(id, {
       ...payload,
       addresses,

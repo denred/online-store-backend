@@ -51,7 +51,7 @@ const commonProductsSchema = {
   quantity: quantitySchema,
   quantities: Joi.object().pattern(
     Joi.string().valid(...Object.values(Size)),
-    Joi.number().messages(getErrorMessages()),
+    Joi.number().integer().positive().messages(getErrorMessages()),
   ),
 };
 

@@ -67,9 +67,13 @@ import { type OrdersService } from './orders.service.js';
  *       properties:
  *         productId:
  *           type: string
- *         quantity:
- *           type: integer
- *           example: 2
+ *         quantities:
+ *           type: object
+ *           properties:
+ *             XS:
+ *               type: number
+ *             S:
+ *               type: number
  *
  *     CreateOrderDTO:
  *       type: object
