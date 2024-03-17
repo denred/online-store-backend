@@ -1,4 +1,4 @@
-import { type Product } from '@prisma/client';
+import { Size, type Product } from '@prisma/client';
 
 import { HttpError } from '~/libs/exceptions/http-error.exception.js';
 import { type IService } from '~/libs/interfaces/interfaces.js';
@@ -10,7 +10,11 @@ import {
   ProductSubcategory,
   ProductValidationRules,
 } from './libs/enums/enums.js';
-import { getBuildId, getBuildImageName } from './libs/helpers/helpers.js';
+import {
+  getBuildId,
+  getBuildImageName,
+  getQuantity,
+} from './libs/helpers/helpers.js';
 import {
   type CreateProductDto,
   type GetFilteredProductRequestDto,
@@ -33,8 +37,13 @@ class ProductsService implements IService {
     this.filesService = filesService;
   }
 
-  public updateProductQuantity(id: string, quantity: number): Promise<Product> {
-    return this.productsRepository.update(id, { quantity });
+  public updateProductQuantity(
+    id: string,
+    quantities: Record<Size, number>,
+  ): Promise<Product> {
+    const quantity = getQuantity(quantities);
+    const size = Object.keys(quantities || []) as Size[];
+    return this.productsRepository.update(id, { quantity, quantities, size });
   }
 
   public async findAll(query: PaginatedQuery): Promise<GetProductsResponseDto> {
@@ -55,10 +64,14 @@ class ProductsService implements IService {
   }
 
   public async create(payload: CreateProductDto): Promise<Product> {
-    const { files } = payload;
+    const { files, quantities } = payload;
     await this.validateFiles(files);
 
-    return this.productsRepository.create(payload);
+    const quantity = getQuantity(quantities as Record<Size, number>);
+
+    const size = Object.keys(quantities || []) as Size[];
+
+    return this.productsRepository.create({ ...payload, quantity, size });
   }
 
   public async update(id: string, payload: Partial<Product>): Promise<Product> {

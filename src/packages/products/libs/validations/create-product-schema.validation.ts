@@ -17,6 +17,7 @@ const {
   brand,
   collection,
   files,
+  quantities,
 } = commonProductsSchema;
 
 const createProductSchema = Joi.object({
@@ -27,13 +28,12 @@ const createProductSchema = Joi.object({
   colour: colour.required(),
   description: description.required(),
   composition: composition.required(),
-  size: size.required(),
   price: price.required(),
   brand: brand,
   collection: collection,
   manufacturer: manufacturer,
   files: files,
-  quantity: quantitySchema,
+  quantities: quantities,
 });
 
 export { createProductSchema };

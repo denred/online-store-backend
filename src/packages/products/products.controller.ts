@@ -1,4 +1,4 @@
-import { type Product } from '@prisma/client';
+import { Size, type Product } from '@prisma/client';
 
 import { ApiPath } from '~/libs/enums/enums.js';
 import {
@@ -63,6 +63,13 @@ import { type ProductsService } from './products.service.js';
  *           type: string
  *         manufacturer:
  *           type: string
+ *         quantities:
+ *           type: object
+ *           properties:
+ *             XS:
+ *               type: number
+ *             S:
+ *               type: number
  *         quantity:
  *           type: integer
  *         files:
@@ -125,11 +132,6 @@ import { type ProductsService } from './products.service.js';
  *         composition:
  *           type: string
  *           example: '60% polyester, 40% recycled polyester. Lining: 100% polyester...'
- *         size:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Size'
- *           example: ['XS', 'S', 'M', 'L', 'XL']
  *         price:
  *           type: number
  *           example: 199.9
@@ -139,9 +141,13 @@ import { type ProductsService } from './products.service.js';
  *         manufacturer:
  *           type: string
  *           example: Bangladesh
- *         quantity:
- *           type: integer
- *           example: 5
+ *         quantities:
+ *           type: object
+ *           additionalProperties:
+ *             type: number
+ *           example:
+ *             XS: 10
+ *             S: 20
  *         files:
  *           type: array
  *           items:
@@ -434,7 +440,7 @@ class ProductsController extends Controller {
         this.updateQuantity(
           options as ApiHandlerOptions<{
             params: { id: string };
-            body: { quantity: number };
+            body: { quantities: Record<Size, number> };
           }>,
         ),
     });
@@ -923,16 +929,20 @@ class ProductsController extends Controller {
    *         schema:
    *           type: string
    *     requestBody:
+   *       required: true
    *       content:
    *         application/json:
    *           schema:
    *             type: object
-   *             required:
-   *               - quantity
    *             properties:
-   *               quantity:
-   *                 type: number
-   *                 description: New quantity for the product
+   *               quantities:
+   *                 type: object
+   *                 additionalProperties:
+   *                   type: number
+   *             example:
+   *               quantities:
+   *                 XS: 10
+   *                 S: 20
    *     responses:
    *       '200':
    *         description: Successful product update.
@@ -941,39 +951,38 @@ class ProductsController extends Controller {
    *             schema:
    *               $ref: '#/components/schemas/Product'
    *
-   *       404:
+   *       '404':
    *         description: Product not found
    *         content:
    *           application/json:
    *             schema:
    *               $ref: '#/components/schemas/ProductNotFoundError'
    *
-   *       422:
+   *       '422':
    *         description: Unprocessable Entity
    *         content:
    *           application/json:
    *             schema:
    *               $ref: '#/components/schemas/ProductValidationError'
    *
-   *       400:
+   *       '400':
    *         description: Bad Request.
    *         content:
    *           application/json:
    *             schema:
    *               $ref: '#/components/schemas/ProductInvalidIdError'
-   *
    */
   private async updateQuantity(
     options: ApiHandlerOptions<{
       params: { id: string };
-      body: { quantity: number };
+      body: { quantities: Record<Size, number> };
     }>,
   ): Promise<ApiHandlerResponse> {
     const { id } = options.params;
-    const { quantity } = options.body;
+    const { quantities } = options.body;
     const updatedProduct = await this.productsService.updateProductQuantity(
       id,
-      quantity,
+      quantities,
     );
 
     return {

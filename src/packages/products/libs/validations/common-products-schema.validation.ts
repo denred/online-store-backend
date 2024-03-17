@@ -49,6 +49,10 @@ const commonProductsSchema = {
     .messages(getErrorMessages()),
   files: Joi.array().items(Joi.string()),
   quantity: quantitySchema,
+  quantities: Joi.object().pattern(
+    Joi.string().valid(...Object.values(Size)),
+    Joi.number().integer().positive().messages(getErrorMessages()),
+  ),
 };
 
 export { commonProductsSchema };

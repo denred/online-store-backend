@@ -4,3 +4,4 @@ export { productQuantitySchema } from './product-quantity-schema.validation.js';
 export { productSchema } from './product-schema.validation.js';
 export { productParametersSchema } from './string-schema.validation.js';
 export { updateProductSchema } from './update-product-schema.validation.js';
+export { commonProductsSchema } from './common-products-schema.validation.js';

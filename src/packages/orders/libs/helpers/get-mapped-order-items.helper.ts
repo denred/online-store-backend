@@ -2,10 +2,10 @@ import { type OrderItem } from '@prisma/client';
 
 const getMappedOrderItems = (
   orderItems: OrderItem[],
-): Pick<OrderItem, 'productId' | 'quantity'>[] =>
-  orderItems.map(({ productId, quantity }) => ({
+): Pick<OrderItem, 'productId' | 'quantities'>[] =>
+  orderItems.map(({ productId, quantities }) => ({
     productId,
-    quantity,
+    quantities,
   }));
 
 export { getMappedOrderItems };

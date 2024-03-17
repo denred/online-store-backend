@@ -6,19 +6,17 @@ import {
 } from '~/libs/validations/validations.js';
 
 import { OrdersValidationRules } from '../enums/enums.js';
+import { commonProductsSchema } from '~/packages/products/libs/validations/validations.js';
+
+const { quantities: quantitiesSchema } = commonProductsSchema;
 
 const commonOrderSchema = {
   orderItemsSchema: Joi.array()
     .items(
       Joi.object({
         productId: Joi.string().required().messages(getErrorMessages()),
-
-        quantity: Joi.number()
-          .integer()
-          .min(OrdersValidationRules.MIN_QUANTITY)
-          .required()
-          .messages(getErrorMessages()),
-      }).messages(getErrorMessages()),
+        quantities: quantitiesSchema.required().messages(getErrorMessages()),
+      }).required(),
     )
     .messages(getErrorMessages()),
   orderDeliverySchema: {

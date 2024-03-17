@@ -91,6 +91,7 @@ model Product {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @default(now()) @updatedAt
   files        String[]
+  quantities   Json?
   quantity     Int
 
   OrderItem OrderItem[]
@@ -139,10 +140,11 @@ model Order {
 }
 
 model OrderItem {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  orderId   String @db.ObjectId
-  productId String @db.ObjectId
-  quantity  Int
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId    String @db.ObjectId
+  productId  String @db.ObjectId
+  quantity   Int
+  quantities Json?
 
   Order   Order   @relation(fields: [orderId], references: [id])
   product Product @relation(fields: [productId], references: [id])

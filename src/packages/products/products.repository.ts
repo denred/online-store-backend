@@ -31,7 +31,8 @@ class ProductsRepository implements IRepository {
     payload: Partial<Product>,
     query: PaginatedQuery,
   ): Promise<Product[]> {
-    const { category, subcategory, colour, size, files, ...rest } = payload;
+    const { category, subcategory, colour, size, files, quantities, ...rest } =
+      payload;
 
     const whereClause: Prisma.ProductWhereInput = {
       ...(category && { category: { equals: category } }),

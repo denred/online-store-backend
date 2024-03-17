@@ -1,20 +1,26 @@
 import {
+  type Size,
   type Order,
   type OrderItem,
   type Prisma,
   type PrismaClient,
 } from '@prisma/client';
 import { type DefaultArgs } from '@prisma/client/runtime/library.js';
-
-import { TransactionConfigParameters } from '~/libs/enums/enums.js';
-import { throwError } from '~/libs/exceptions/exceptions.js';
-import { HttpCode } from '~/libs/packages/http/http.js';
-
-import { OrderErrorMessage } from './libs/enums/enums.js';
 import {
   type CreateOrderPayload,
   type UpdateOrderPayload,
 } from './libs/types/types.js';
+
+import { TransactionConfigParameters } from '~/libs/enums/enums.js';
+import { throwError } from '~/libs/exceptions/exceptions.js';
+import { HttpCode } from '~/libs/packages/http/http.js';
+import { OrderErrorMessage } from './libs/enums/enums.js';
+import {
+  isProductAvailable,
+  getActualOrderQuantities,
+  getNegativeValues,
+} from './libs/helpers/helpers.js';
+import { getQuantity } from '../products/products.js';
 
 class OrdersRepository {
   private db: Pick<
@@ -35,29 +41,31 @@ class OrdersRepository {
     tx,
     orderItem,
     existingOrderItems,
-    deletionFlag,
   }: {
     tx: Omit<
       PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
       '$transaction' | '$on' | '$connect' | '$disconnect' | '$use' | '$extends'
     >;
-    orderItem: Pick<OrderItem, 'productId' | 'quantity'>;
-    existingOrderItems?: Pick<OrderItem, 'productId' | 'quantity'>[];
-    deletionFlag?: true;
+    orderItem: Pick<OrderItem, 'productId' | 'quantities'>;
+    existingOrderItems?: Pick<OrderItem, 'productId' | 'quantities'>[];
   }): Promise<void> {
-    const { productId, quantity } = orderItem;
+    const { productId, quantities } = orderItem;
 
     const existingProduct = await tx.product.findUnique({
       where: { id: productId },
     });
 
-    const { quantity: existingOrderQuantity } = existingOrderItems?.find(
-      (it) => it.productId === productId,
-    ) ?? { quantity: 0 };
+    const { quantities: orderQuantities } =
+      existingOrderItems?.find(({ productId: id }) => id === productId) || {};
 
     if (
       !existingProduct ||
-      existingProduct.quantity < Math.max(quantity - existingOrderQuantity, 0)
+      !isProductAvailable({
+        productQuantities: existingProduct.quantities as Record<Size, number>,
+        orderQuantities: quantities as Record<Size, number>,
+        existingOrderQuantities:
+          (orderQuantities as Record<Size, number>) || {},
+      })
     ) {
       throwError(
         `Insufficient quantity for product ${productId}`,
@@ -65,18 +73,19 @@ class OrdersRepository {
       );
     }
 
-    const difference = Math.abs(quantity - existingOrderQuantity);
-    const isDecrement = quantity > existingOrderQuantity;
+    const updatedProductQuantities = getActualOrderQuantities({
+      productQuantities: existingProduct?.quantities as Record<Size, number>,
+      orderQuantities: quantities as Record<Size, number>,
+      existingOrderQuantities: (orderQuantities as Record<Size, number>) || {},
+    });
 
-    isDecrement && !deletionFlag
-      ? await tx.product.update({
-          where: { id: productId },
-          data: { quantity: { decrement: difference } },
-        })
-      : await tx.product.update({
-          where: { id: productId },
-          data: { quantity: { increment: difference } },
-        });
+    await tx.product.update({
+      where: { id: productId },
+      data: {
+        quantities: updatedProductQuantities,
+        quantity: getQuantity(updatedProductQuantities),
+      },
+    });
   }
 
   public createOrder(payload: CreateOrderPayload): Promise<Order> {
@@ -84,10 +93,18 @@ class OrdersRepository {
 
     return this.db.$transaction(
       async (tx) => {
+        const updatedOrderItems: Pick<
+          OrderItem,
+          'productId' | 'quantities' | 'quantity'
+        >[] = [];
         for (const orderItem of orderItems) {
           await this.updateProductQuantity({
             tx,
             orderItem,
+          });
+          updatedOrderItems.push({
+            ...orderItem,
+            quantity: getQuantity(orderItem.quantities as Record<Size, number>),
           });
         }
 
@@ -97,7 +114,7 @@ class OrdersRepository {
             totalPrice,
             orderItems: {
               createMany: {
-                data: [...orderItems],
+                data: [...updatedOrderItems],
               },
             },
           },
@@ -139,19 +156,25 @@ class OrdersRepository {
           },
         });
 
-        for (const orderItem of existingOrderItems) {
+        for (const { productId, quantities } of existingOrderItems) {
+          const updatedOrderItem = {
+            productId,
+            quantities: getNegativeValues<Size>(
+              quantities as Record<Size, number>,
+            ),
+          };
           await this.updateProductQuantity({
             tx,
-            orderItem,
-            deletionFlag: true,
+            orderItem: updatedOrderItem,
           });
         }
 
         await tx.orderItem.createMany({
-          data: orderItems.map(({ productId, quantity }) => ({
+          data: orderItems.map(({ productId, quantities }) => ({
             orderId,
             productId,
-            quantity,
+            quantity: getQuantity(quantities as Record<Size, number>),
+            quantities,
           })),
         });
 
@@ -188,8 +211,18 @@ class OrdersRepository {
         throwError(OrderErrorMessage.NOT_FOUND, HttpCode.NOT_FOUND);
       }
 
-      for (const orderItem of order?.orderItems ?? []) {
-        await this.updateProductQuantity({ tx, orderItem, deletionFlag: true });
+      for (const { productId, quantities } of order?.orderItems ?? []) {
+        const updatedOrderItem = {
+          productId,
+          quantities: getNegativeValues<Size>(
+            quantities as Record<Size, number>,
+          ),
+        };
+
+        await this.updateProductQuantity({
+          tx,
+          orderItem: updatedOrderItem,
+        });
       }
 
       await tx.orderItem.deleteMany({
