@@ -1,3 +1,4 @@
+import { Size } from '@prisma/client';
 import { type PaginatedQuery } from '~/libs/types/types.js';
 
 const getIsObjectEmpty = (object: PaginatedQuery): boolean =>
@@ -27,4 +28,7 @@ const getBuildImageName = (title: string, filename: string): string => {
   return `${formattedTitle.replaceAll(/\s+/g, '-')}-image-${cleanedFilename}`;
 };
 
-export { getBuildId, getBuildImageName, getSkip, getTake };
+const getQuantity = (quantities: Record<Size, number>): number =>
+  quantities ? Object.values(quantities).reduce((a, b) => a + b, 0) : 0;
+
+export { getBuildId, getBuildImageName, getSkip, getTake, getQuantity };

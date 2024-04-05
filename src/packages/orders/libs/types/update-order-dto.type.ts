@@ -5,7 +5,7 @@ type UpdateOrderDTO = {
   orderDelivery?: Partial<
     Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
   >;
-  orderItems?: Pick<OrderItem, 'productId' | 'quantity'>[];
+  orderItems?: Pick<OrderItem, 'productId' | 'quantities'>[];
 };
 
 export { type UpdateOrderDTO };
