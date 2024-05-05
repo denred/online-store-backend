@@ -94,7 +94,7 @@ import { type SubscribersService } from './subscribers.service.js';
  *             message:
  *               type: string
  *               enum:
- *                 - Subscription isn't valid!
+ *                 - Validation error!
  *
  *     SubscriptionNotFound:
  *       allOf:
