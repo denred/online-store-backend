@@ -93,8 +93,7 @@ model Product {
   files        String[]
   quantities   Json?
   quantity     Int
-
-  OrderItem OrderItem[]
+  OrderItem    OrderItem[]
 }
 
 model Review {
@@ -124,8 +123,7 @@ model Address {
   userId    String   @db.ObjectId
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Order {
@@ -135,8 +133,9 @@ model Order {
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @default(now()) @updatedAt
   orderItems OrderItem[]
-
-  user User @relation(fields: [userId], references: [id])
+  paymentId  String?     @db.ObjectId
+  payment    Payment?
+  user       User        @relation(fields: [userId], references: [id])
 }
 
 model OrderItem {
@@ -164,4 +163,21 @@ model Preferences {
   productUpdates    Boolean      @default(false)
   subscriptionId    String       @unique @db.ObjectId
   subscription      Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+enum PaymentStatus {
+  SUCCESS
+  REJECTED
+}
+
+model Payment {
+  id         String        @id @default(auto()) @map("_id") @db.ObjectId
+  cardNumber String        @unique
+  cardHolder String
+  status     PaymentStatus
+  userId     String?       @db.ObjectId
+  orderId    String?       @unique @db.ObjectId
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @default(now()) @updatedAt
+  order      Order?        @relation(fields: [orderId], references: [id])
 }
