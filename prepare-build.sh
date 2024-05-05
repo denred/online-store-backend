@@ -9,4 +9,4 @@ copy_files() {
 }
 
 # Copy mail layouts
-copy_files "./src/packages/mail/libs/views/layouts" "./build/packages/mail/libs/views/layouts"
+copy_files "./src/packages/mail/libs/views/layouts" "./build/packages/mail/libs/views/order-confirmation/layouts"

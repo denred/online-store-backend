@@ -6,6 +6,7 @@ import { ordersController } from '~/packages/orders/orders.js';
 import { productsController } from '~/packages/products/products.js';
 import { subscribersController } from '~/packages/subscribers/subscribers.js';
 import { usersService } from '~/packages/users/users.js';
+import { paymentsController } from '~/packages/payments/payments.js';
 
 import { config } from '../config/config.js';
 import { database } from '../database/database.js';
@@ -26,6 +27,7 @@ async function initServer(): Promise<FastifyInstance> {
       ...subscribersController.routes,
       ...ordersController.routes,
       ...authController.routes,
+      ...paymentsController.routes,
     );
 
     server = new ServerApp({

@@ -1,6 +1,8 @@
+import path from 'path';
 import fastifyAuth, { type FastifyAuthFunction } from '@fastify/auth';
 import cors from '@fastify/cors';
 import fastifyMultipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
 import swagger, { type StaticDocumentSpec } from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { type PrismaClient } from '@prisma/client';
@@ -212,6 +214,11 @@ class ServerApp implements IServerApp {
           methods: 'GET,PUT,POST,DELETE',
           allowedHeaders: 'Content-Type',
         });
+
+        await this.app.register(fastifyStatic, {
+          root: path.join(path.resolve(), 'styles'),
+          prefix: '/styles/',
+        });
       }),
     );
   }
@@ -314,7 +321,7 @@ class ServerApp implements IServerApp {
       });
 
     this.logger.info(
-      `Application is listening on PORT – ${this.config.ENV.APP.PORT.toString()}, on ENVIRONMENT – ${
+      `Application is listening on PORT - ${this.config.ENV.APP.PORT.toString()}, on ENVIRONMENT - ${
         this.config.ENV.APP.ENVIRONMENT as string
       }.`,
     );

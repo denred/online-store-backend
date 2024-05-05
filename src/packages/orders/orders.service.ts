@@ -21,6 +21,10 @@ import {
   type UpdateOrderDTO,
 } from './libs/types/types.js';
 import { type OrdersRepository } from './orders.repository.js';
+import { mailService } from '../mail/mail.js';
+import { OrderConfirmationView } from '../mail/libs/views/order-confirmation/order-confirmation.view.js';
+import { TemplateName } from '../mail/libs/enums/template-name.enum.js';
+import { OrderConfirmationViewParameter } from '../mail/libs/views/order-confirmation/libs/types/order-confirmation-view-parameter.type.js';
 
 class OrdersService implements IService {
   private ordersRepository: OrdersRepository;
@@ -50,6 +54,12 @@ class OrdersService implements IService {
     });
 
     try {
+      await mailService.sendPage(
+        { to: user.email, subject: 'order' },
+        TemplateName.ORDER_CONFIRMATION,
+        {} as OrderConfirmationViewParameter,
+      );
+
       return await this.ordersRepository.createOrder({
         userId: createdUser.id,
         totalPrice,

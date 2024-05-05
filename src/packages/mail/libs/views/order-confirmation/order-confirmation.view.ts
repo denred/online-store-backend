@@ -10,10 +10,10 @@ class OrderConfirmationView extends View implements IView {
   public constructor(templateName: TemplateNameValues) {
     const templatePath = path.join(
       path.dirname(url.fileURLToPath(import.meta.url)),
-      '..',
       'layouts',
       `${templateName}.hbs`,
     );
+
     super(templatePath);
   }
 
